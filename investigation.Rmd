@@ -16,6 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load-lib, message = FALSE}
 library(tidyverse)
+library(ggplot2)
 # Add any other libraries here
 
 
@@ -25,6 +26,9 @@ library(tidyverse)
 
 ```{r load-data}
 # load your data 
+nearest_earth_objects <- read.csv("data/nearest-earth-objects(1910-2024).csv")
+nasa_close_approach <- read.csv("data/NASA_Close_Approach_Data_1960_2060-selected-columns.csv")
+neo_dur_df <- read.csv("data/neo_dur_df.csv")
 
 
 
