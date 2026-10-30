@@ -23,15 +23,20 @@ library(ggplot2)
 
 ```
 
+Question: What physical and orbital characteristics (such as absolute magnitude, estimated diameter, and velocity) are the strongest indicators of whether a near-Earth asteroid is classified as potentially hazardous?
+
+Variables that might be related:
+- Miss distance
+- Size (diameter)
+- Velocity
+
 
 ```{r load-data}
 # load your data 
-nearest_earth_objects <- read.csv("data/nearest-earth-objects(1910-2024).csv")
-nasa_close_approach <- read.csv("data/NASA_Close_Approach_Data_1960_2060-selected-columns.csv")
-neo_dur_df <- read.csv("data/neo_dur_df.csv")
-
-
-
+nearest_earth_objects <- read_csv("data/nearest-earth-objects(1910-2024).csv")
+view(nearest_earth_objects)
+neo_dur_df <- read_csv("data/neo_dur_df.csv")
+View(neo_dur_df)
 
 ```
 

@@ -11,7 +11,7 @@
 
 <meta name="author" content="by Team-Name: User1, User2, User3, User4 &amp; User5" />
 
-<meta name="date" content="2026-10-29" />
+<meta name="date" content="2026-10-30" />
 
 <title>IDS investigation worksheet</title>
 
@@ -353,7 +353,7 @@ display: none;
 <h1 class="title toc-ignore">IDS investigation worksheet</h1>
 <h4 class="author">by Team-Name: User1, User2, User3, User4 &amp;
 User5</h4>
-<h4 class="date">2026-10-29</h4>
+<h4 class="date">2026-10-30</h4>
 
 </div>
 
@@ -369,10 +369,37 @@ project.</p>
 <pre class="r"><code>library(tidyverse)
 library(ggplot2)
 # Add any other libraries here</code></pre>
+<p>Question: What physical and orbital characteristics (such as absolute
+magnitude, estimated diameter, and velocity) are the strongest
+indicators of whether a near-Earth asteroid is classified as potentially
+hazardous?</p>
+<p>Variables that might be related: - Miss distance - Size (diameter) -
+Velocity</p>
 <pre class="r"><code># load your data 
-nearest_earth_objects &lt;- read.csv(&quot;data/nearest-earth-objects(1910-2024).csv&quot;)
-nasa_close_approach &lt;- read.csv(&quot;data/NASA_Close_Approach_Data_1960_2060-selected-columns.csv&quot;)
-neo_dur_df &lt;- read.csv(&quot;data/neo_dur_df.csv&quot;)</code></pre>
+nearest_earth_objects &lt;- read_csv(&quot;data/nearest-earth-objects(1910-2024).csv&quot;)</code></pre>
+<pre><code>## Rows: 338199 Columns: 9
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (2): name, orbiting_body
+## dbl (6): neo_id, absolute_magnitude, estimated_diameter_min, estimated_diame...
+## lgl (1): is_hazardous
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>view(nearest_earth_objects)
+neo_dur_df &lt;- read_csv(&quot;data/neo_dur_df.csv&quot;)</code></pre>
+<pre><code>## New names:
+## Rows: 25869 Columns: 44
+## ── Column specification
+## ──────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## (8): equinox, orbit_class_type, orbit_class_description, name, orbitin... dbl
+## (32): ...1, id, orbit_id, data_arc_in_days, observations_used, orbit_un... lgl
+## (1): is_potentially_hazardous_asteroid dttm (1): orbit_determination_date date
+## (2): first_observation_date, last_observation_date
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+## Specify the column types or set `show_col_types = FALSE` to quiet this message.
+## • `` -&gt; `...1`</code></pre>
+<pre class="r"><code>View(neo_dur_df)</code></pre>
 
 
 
