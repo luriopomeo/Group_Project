@@ -30,6 +30,7 @@ Variables that might be related:
 - Size (diameter)
 - Velocity
 
+https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-full-dataset
 
 ```{r load-data}
 # load your data 
