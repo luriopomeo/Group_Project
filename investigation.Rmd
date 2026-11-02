@@ -32,6 +32,11 @@ Variables that might be related:
 
 https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-full-dataset
 
+• Near-Earth Objects (NEOs): Any asteroid or comet that comes within 1.3 AU of the Sun.
+• Potentially Hazardous Asteroids (PHAs): A specific subset of NEOs that pose a more significant threat. To be classified as a PHA, the asteroid must:
+	- Come within 0.05 AU of Earth (about 4.6 million miles or 7.5 million kilometers).
+	- Be large enough to cause significant regional damage (typically larger than 140 meters or 460 feet in diameter).
+
 ```{r load-data}
 # load your data 
 nearest_earth_objects <- read_csv("data/nearest-earth-objects(1910-2024).csv")
