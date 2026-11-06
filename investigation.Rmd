@@ -103,19 +103,14 @@ ALFIE'S WORKSPACE:
 
 
 ```{r}
-# Checking parameters for potentially hazardous NEOs as described above for minimum measurements
-neo_dur_df %>%
-  filter(
-    estimated_diameter_kilometers_min > 0.14,
-    
-         )
-
-
-
-
-
-
-
+#Making a new data set purely for orbiting body, velocity and miss distance
+individual_observations <- neo_dur_df %>%
+  pivot_longer(
+    cols = matches("^(relative_velocity|orbiting_body|miss_distance_kilometers)[0-3]$"),
+    names_to = c(".value", "observation"),
+    names_pattern = "(relative_velocity|orbiting_body|miss_distance_kilometers)([0-3])"
+  )
+  
 ```
 
 

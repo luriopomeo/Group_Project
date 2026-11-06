@@ -407,34 +407,69 @@ neo_dur_df &lt;- read_csv(&quot;data/neo_dur_df.csv&quot;)</code></pre>
 ## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
 ## Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`</code></pre>
-<pre class="r"><code>View(neo_dur_df)</code></pre>
+<pre class="r"><code>View(neo_dur_df)
+variable_reference &lt;-  tribble(
+  ~variable, ~category, ~description,
+  # Identification and observation information
+  &quot;...1&quot;, &quot;Identification&quot;, &quot;Automatically generated row index; not an asteroid characteristic.&quot;,
+  &quot;id&quot;, &quot;Identification&quot;, &quot;Unique numerical identifier assigned to the asteroid.&quot;,
+  &quot;neo_reference_id&quot;, &quot;Identification&quot;, &quot;NASA reference identification number for the near-Earth object.&quot;,
+  &quot;name&quot;, &quot;Identification&quot;, &quot;Official name or designation of the asteroid.&quot;,
+  &quot;orbit_id&quot;, &quot;Observation&quot;, &quot;Identifier of the particular orbital solution associated with the asteroid.&quot;,
+  &quot;orbit_determination_date&quot;, &quot;Observation&quot;, &quot;Date and time when the asteroid&#39;s orbital solution was determined or updated.&quot;,
+  &quot;first_observation_date&quot;, &quot;Observation&quot;, &quot;Date of the earliest recorded observation of the asteroid.&quot;,
+  &quot;last_observation_date&quot;, &quot;Observation&quot;, &quot;Date of the most recent observation included in the orbital data.&quot;,
+  &quot;data_arc_in_days&quot;, &quot;Observation&quot;, &quot;Number of days between the first and last recorded observations.&quot;,
+  &quot;observations_used&quot;, &quot;Observation&quot;, &quot;Number of observations used to calculate the asteroid&#39;s orbit.&quot;,
+  &quot;orbit_uncertainty&quot;, &quot;Observation&quot;, &quot;Orbital uncertainty parameter (U); lower values generally indicate greater orbital certainty.&quot;,
+  # Orbital characteristics
+  &quot;minimum_orbit_intersection&quot;, &quot;Orbital characteristics&quot;, &quot;Minimum Orbit Intersection Distance (MOID): minimum distance between the asteroid&#39;s orbital path and Earth&#39;s orbital path, usually in AU.&quot;,
+  &quot;jupiter_tisserand_invariant&quot;, &quot;Orbital characteristics&quot;, &quot;Dimensionless parameter used to classify small Solar System bodies and describe their orbital relationship with Jupiter.&quot;,
+  &quot;epoch_osculation&quot;, &quot;Orbital characteristics&quot;, &quot;Reference time, expressed as a Julian date, for the asteroid&#39;s osculating orbital elements.&quot;,
+  &quot;eccentricity&quot;, &quot;Orbital characteristics&quot;, &quot;Measures how elliptical the asteroid&#39;s orbit is. Zero represents a circular orbit; values approaching one represent increasingly elongated elliptical orbits.&quot;,
+  &quot;semi_major_axis&quot;, &quot;Orbital characteristics&quot;, &quot;Half the longest diameter of the asteroid&#39;s elliptical orbit, measured in AU.&quot;,
+  &quot;inclination&quot;, &quot;Orbital characteristics&quot;, &quot;Angle between the asteroid&#39;s orbital plane and the ecliptic.&quot;,
+  &quot;ascending_node_longitude&quot;, &quot;Orbital characteristics&quot;, &quot;Angle describing the orientation of the orbit at the point where it crosses the ecliptic from south to north.&quot;,
+  &quot;orbital_period&quot;, &quot;Orbital characteristics&quot;, &quot;Time required for the asteroid to complete one revolution around the Sun, measured in days.&quot;,
+  &quot;perihelion_distance&quot;, &quot;Orbital characteristics&quot;, &quot;Minimum distance between the asteroid and the Sun during its orbit, measured in AU.&quot;,
+  &quot;perihelion_argument&quot;, &quot;Orbital characteristics&quot;, &quot;Angle describing the orientation of the asteroid&#39;s perihelion within its orbital plane.&quot;,
+  &quot;aphelion_distance&quot;, &quot;Orbital characteristics&quot;, &quot;Maximum distance between the asteroid and the Sun during its orbit, measured in AU.&quot;,
+  &quot;perihelion_time&quot;, &quot;Orbital characteristics&quot;, &quot;Julian date corresponding to the time when the asteroid passes its closest point to the Sun.&quot;,
+  &quot;mean_anomaly&quot;, &quot;Orbital characteristics&quot;, &quot;Angular measurement describing the asteroid&#39;s position along its orbit relative to perihelion.&quot;,
+  &quot;mean_motion&quot;, &quot;Orbital characteristics&quot;, &quot;Average angular speed of the asteroid along its orbit, usually measured in degrees per day.&quot;,
+  &quot;equinox&quot;, &quot;Orbital characteristics&quot;, &quot;Reference coordinate system used to define the orbital elements; J2000 refers to the standard astronomical reference epoch.&quot;,
+  &quot;orbit_class_type&quot;, &quot;Orbital classification&quot;, &quot;Short code identifying the asteroid&#39;s orbital classification, e.g. whether they approach (Amor), cross outside (Apollo), cross inside (Atens), or do not cross (Atira) Earth&#39;s orbit&quot;,
+  &quot;orbit_class_description&quot;, &quot;Orbital classification&quot;, &quot;Written description of the asteroid&#39;s orbital classification.&quot;,
+  # Physical characteristics and potential hazards
+  &quot;absolute_magnitude_h&quot;, &quot;Physical characteristics&quot;, &quot;Absolute magnitude (H), representing intrinsic brightness. Smaller values indicate brighter objects.&quot;,
+  &quot;estimated_diameter_kilometers_min&quot;, &quot;Physical characteristics&quot;, &quot;Lower estimate of the asteroid&#39;s diameter in kilometres.&quot;,
+  &quot;estimated_diameter_kilometers_max&quot;, &quot;Physical characteristics&quot;, &quot;Upper estimate of the asteroid&#39;s diameter in kilometres.&quot;,
+  &quot;is_potentially_hazardous_asteroid&quot;, &quot;Hazard classification&quot;, &quot;TRUE or FALSE indicator of whether NASA classifies the asteroid as potentially hazardous.&quot;,
+  # Close approach information
+  &quot;orbiting_body0&quot;, &quot;Close approach 1&quot;, &quot;First recorded celestial body approached by the asteroid.&quot;,
+  &quot;miss_distance_kilometers0&quot;, &quot;Close approach 1&quot;, &quot;Distance to the first recorded celestial body at closest approach, in kilometres.&quot;,
+  &quot;relative_velocity0&quot;, &quot;Close approach 1&quot;, &quot;Velocity relative to the first recorded celestial body at closest approach, in km/s.&quot;,
+  
+  &quot;orbiting_body1&quot;, &quot;Close approach 2&quot;, &quot;Second recorded celestial body approached by the asteroid.&quot;,
+  &quot;miss_distance_kilometers1&quot;, &quot;Close approach 2&quot;, &quot;Distance to the second recorded celestial body at closest approach, in kilometres.&quot;,
+  &quot;relative_velocity1&quot;, &quot;Close approach 2&quot;, &quot;Velocity relative to the second recorded celestial body at closest approach, in km/s.&quot;,
+  
+  &quot;orbiting_body2&quot;, &quot;Close approach 3&quot;, &quot;Third recorded celestial body approached by the asteroid.&quot;,
+  &quot;miss_distance_kilometers2&quot;, &quot;Close approach 3&quot;, &quot;Distance to the third recorded celestial body at closest approach, in kilometres.&quot;,
+  &quot;relative_velocity2&quot;, &quot;Close approach 3&quot;, &quot;Velocity relative to the third recorded celestial body at closest approach, in km/s.&quot;,
+  
+  &quot;orbiting_body3&quot;, &quot;Close approach 4&quot;, &quot;Fourth recorded celestial body approached by the asteroid.&quot;,
+  &quot;miss_distance_kilometers3&quot;, &quot;Close approach 4&quot;, &quot;Distance to the fourth recorded celestial body at closest approach, in kilometres.&quot;,
+  &quot;relative_velocity3&quot;, &quot;Close approach 4&quot;, &quot;Velocity relative to the fourth recorded celestial body at closest approach, in km/s.&quot;
+)</code></pre>
 <p>ALFIE’S WORKSPACE:</p>
-<pre class="r"><code># Checking parameters for potentially hazardous NEOs as described above for minimum measurements
-neo_dur_df %&gt;%
-  filter(
-    estimated_diameter_kilometers_min &gt; 0.14,
-    
-         )</code></pre>
-<pre><code>## # A tibble: 8,379 × 44
-##     ...1      id orbit_id orbit_determination_date first_observation_date
-##    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;                   &lt;date&gt;                
-##  1     0 2000433      659 2021-05-24 17:55:05      1893-10-29            
-##  2     1 2000719      272 2025-03-28 06:20:45      1911-10-04            
-##  3     2 2001036     1392 2025-04-29 06:20:34      1924-10-23            
-##  4     3 2001221      143 2025-02-20 05:51:07      1932-03-12            
-##  5     4 2001566      194 2025-08-19 08:22:05      1949-07-01            
-##  6     5 2001580      375 2025-09-25 06:55:17      1952-10-27            
-##  7     6 2001620      766 2025-09-21 06:51:32      1951-09-14            
-##  8     7 2001627     1496 2025-06-30 20:19:07      1929-09-25            
-##  9     8 2001685      820 2025-08-05 06:17:13      1948-07-17            
-## 10     9 2001862      539 2025-05-15 16:08:52      1930-12-13            
-## # ℹ 8,369 more rows
-## # ℹ 39 more variables: last_observation_date &lt;date&gt;, data_arc_in_days &lt;dbl&gt;,
-## #   observations_used &lt;dbl&gt;, orbit_uncertainty &lt;dbl&gt;,
-## #   minimum_orbit_intersection &lt;dbl&gt;, jupiter_tisserand_invariant &lt;dbl&gt;,
-## #   epoch_osculation &lt;dbl&gt;, eccentricity &lt;dbl&gt;, semi_major_axis &lt;dbl&gt;,
-## #   inclination &lt;dbl&gt;, ascending_node_longitude &lt;dbl&gt;, orbital_period &lt;dbl&gt;,
-## #   perihelion_distance &lt;dbl&gt;, perihelion_argument &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code>#Making a new data set purely for orbiting body, velocity and miss distance
+individual_observations &lt;- neo_dur_df %&gt;%
+  pivot_longer(
+    cols = matches(&quot;^(relative_velocity|orbiting_body|miss_distance_kilometers)[0-3]$&quot;),
+    names_to = c(&quot;.value&quot;, &quot;observation&quot;),
+    names_pattern = &quot;(relative_velocity|orbiting_body|miss_distance_kilometers)([0-3])&quot;
+  )</code></pre>
 
 
 
