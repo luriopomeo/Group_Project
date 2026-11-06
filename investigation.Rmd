@@ -172,3 +172,29 @@ individual_observations <- neo_dur_df %>%
   
 
 ```
+```{r}
+library(tidyverse)
+asteroids_analysis <- neo_dur_df %>%
+  rowwise() %>%
+  mutate(
+    changed_planet = n_distinct(c(
+      orbiting_body0,
+      orbiting_body1,
+      orbiting_body2,
+      orbiting_body3
+    )) > 1
+  ) %>%
+  ungroup()
+
+ggplot(asteroids_analysis,
+       aes(x = changed_planet, fill = is_potentially_hazardous_asteroid)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Hazardous Asteroids and Changes in Orbital Planet",
+    x = "Did the asteroid change its orbital planet?",
+    y = "Proportion of asteroids",
+    fill = "Hazardous"
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  theme_minimal()
+```
