@@ -11,7 +11,7 @@
 
 <meta name="author" content="by Team-Name: User1, User2, User3, User4 &amp; User5" />
 
-<meta name="date" content="2026-11-02" />
+<meta name="date" content="2026-11-06" />
 
 <title>IDS investigation worksheet</title>
 
@@ -353,7 +353,7 @@ display: none;
 <h1 class="title toc-ignore">IDS investigation worksheet</h1>
 <h4 class="author">by Team-Name: User1, User2, User3, User4 &amp;
 User5</h4>
-<h4 class="date">2026-11-02</h4>
+<h4 class="date">2026-11-06</h4>
 
 </div>
 
@@ -408,6 +408,33 @@ neo_dur_df &lt;- read_csv(&quot;data/neo_dur_df.csv&quot;)</code></pre>
 ## Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`</code></pre>
 <pre class="r"><code>View(neo_dur_df)</code></pre>
+<p>ALFIE’S WORKSPACE:</p>
+<pre class="r"><code># Checking parameters for potentially hazardous NEOs as described above for minimum measurements
+neo_dur_df %&gt;%
+  filter(
+    estimated_diameter_kilometers_min &gt; 0.14,
+    
+         )</code></pre>
+<pre><code>## # A tibble: 8,379 × 44
+##     ...1      id orbit_id orbit_determination_date first_observation_date
+##    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;                   &lt;date&gt;                
+##  1     0 2000433      659 2021-05-24 17:55:05      1893-10-29            
+##  2     1 2000719      272 2025-03-28 06:20:45      1911-10-04            
+##  3     2 2001036     1392 2025-04-29 06:20:34      1924-10-23            
+##  4     3 2001221      143 2025-02-20 05:51:07      1932-03-12            
+##  5     4 2001566      194 2025-08-19 08:22:05      1949-07-01            
+##  6     5 2001580      375 2025-09-25 06:55:17      1952-10-27            
+##  7     6 2001620      766 2025-09-21 06:51:32      1951-09-14            
+##  8     7 2001627     1496 2025-06-30 20:19:07      1929-09-25            
+##  9     8 2001685      820 2025-08-05 06:17:13      1948-07-17            
+## 10     9 2001862      539 2025-05-15 16:08:52      1930-12-13            
+## # ℹ 8,369 more rows
+## # ℹ 39 more variables: last_observation_date &lt;date&gt;, data_arc_in_days &lt;dbl&gt;,
+## #   observations_used &lt;dbl&gt;, orbit_uncertainty &lt;dbl&gt;,
+## #   minimum_orbit_intersection &lt;dbl&gt;, jupiter_tisserand_invariant &lt;dbl&gt;,
+## #   epoch_osculation &lt;dbl&gt;, eccentricity &lt;dbl&gt;, semi_major_axis &lt;dbl&gt;,
+## #   inclination &lt;dbl&gt;, ascending_node_longitude &lt;dbl&gt;, orbital_period &lt;dbl&gt;,
+## #   perihelion_distance &lt;dbl&gt;, perihelion_argument &lt;dbl&gt;, …</code></pre>
 
 
 

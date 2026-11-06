@@ -46,5 +46,23 @@ View(neo_dur_df)
 
 ```
 
+ALFIE'S WORKSPACE:
+
+
+```{r}
+# Checking parameters for potentially hazardous NEOs as described above for minimum measurements
+neo_dur_df %>%
+  filter(
+    estimated_diameter_kilometers_min > 0.14,
+    
+         )
+
+
+
+
+
+
+
+```
 
 
