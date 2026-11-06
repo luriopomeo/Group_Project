@@ -198,3 +198,36 @@ ggplot(asteroids_analysis,
   scale_y_continuous(labels = scales::percent) +
   theme_minimal()
 ```
+
+Jonah's Workspace
+```{r}
+neo_dur %>%
+  filter(orbiting_body0 == "Earth") %>%
+  mutate(
+    is_close_miss = case_when(
+      miss_distance_kilometers0 < 7479894 ~TRUE,
+      miss_distance_kilometers0 >= 7479894 ~FALSE
+    )) %>% 
+  count(is_potentially_hazardous_asteroid, is_close_miss) %>%
+  ggplot() +
+  geom_tile(aes(is_close_miss, is_potentially_hazardous_asteroid, fill = n)) +
+  labs(
+    subtitle = "Objects which missed Earth by less than 7 479 894 km are considered 'close misses'",
+    x = "close miss (true / false)",
+    y = "hazardous (true / false"
+      )
+
+neo_dur %>%
+  filter(orbiting_body0 == "Earth") %>%
+  ggplot(aes(miss_distance_kilometers0, relative_velocity0, color = is_potentially_hazardous_asteroid)) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    subtitle = "Comparison of Miss Distance and Relative Velocity (first observation) of objects approaching Earth",
+    x = "first measured miss distance (km)",
+    y = "first measured relative velocity (km)",
+    color = "hazard assessment"
+  )
+```
+
+
+
