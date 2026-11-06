@@ -43,7 +43,60 @@ nearest_earth_objects <- read_csv("data/nearest-earth-objects(1910-2024).csv")
 view(nearest_earth_objects)
 neo_dur_df <- read_csv("data/neo_dur_df.csv")
 View(neo_dur_df)
-
+variable_reference <-  tribble(
+  ~variable, ~category, ~description,
+  # Identification and observation information
+  "...1", "Identification", "Automatically generated row index; not an asteroid characteristic.",
+  "id", "Identification", "Unique numerical identifier assigned to the asteroid.",
+  "neo_reference_id", "Identification", "NASA reference identification number for the near-Earth object.",
+  "name", "Identification", "Official name or designation of the asteroid.",
+  "orbit_id", "Observation", "Identifier of the particular orbital solution associated with the asteroid.",
+  "orbit_determination_date", "Observation", "Date and time when the asteroid's orbital solution was determined or updated.",
+  "first_observation_date", "Observation", "Date of the earliest recorded observation of the asteroid.",
+  "last_observation_date", "Observation", "Date of the most recent observation included in the orbital data.",
+  "data_arc_in_days", "Observation", "Number of days between the first and last recorded observations.",
+  "observations_used", "Observation", "Number of observations used to calculate the asteroid's orbit.",
+  "orbit_uncertainty", "Observation", "Orbital uncertainty parameter (U); lower values generally indicate greater orbital certainty.",
+  # Orbital characteristics
+  "minimum_orbit_intersection", "Orbital characteristics", "Minimum Orbit Intersection Distance (MOID): minimum distance between the asteroid's orbital path and Earth's orbital path, usually in AU.",
+  "jupiter_tisserand_invariant", "Orbital characteristics", "Dimensionless parameter used to classify small Solar System bodies and describe their orbital relationship with Jupiter.",
+  "epoch_osculation", "Orbital characteristics", "Reference time, expressed as a Julian date, for the asteroid's osculating orbital elements.",
+  "eccentricity", "Orbital characteristics", "Measures how elliptical the asteroid's orbit is. Zero represents a circular orbit; values approaching one represent increasingly elongated elliptical orbits.",
+  "semi_major_axis", "Orbital characteristics", "Half the longest diameter of the asteroid's elliptical orbit, measured in AU.",
+  "inclination", "Orbital characteristics", "Angle between the asteroid's orbital plane and the ecliptic.",
+  "ascending_node_longitude", "Orbital characteristics", "Angle describing the orientation of the orbit at the point where it crosses the ecliptic from south to north.",
+  "orbital_period", "Orbital characteristics", "Time required for the asteroid to complete one revolution around the Sun, measured in days.",
+  "perihelion_distance", "Orbital characteristics", "Minimum distance between the asteroid and the Sun during its orbit, measured in AU.",
+  "perihelion_argument", "Orbital characteristics", "Angle describing the orientation of the asteroid's perihelion within its orbital plane.",
+  "aphelion_distance", "Orbital characteristics", "Maximum distance between the asteroid and the Sun during its orbit, measured in AU.",
+  "perihelion_time", "Orbital characteristics", "Julian date corresponding to the time when the asteroid passes its closest point to the Sun.",
+  "mean_anomaly", "Orbital characteristics", "Angular measurement describing the asteroid's position along its orbit relative to perihelion.",
+  "mean_motion", "Orbital characteristics", "Average angular speed of the asteroid along its orbit, usually measured in degrees per day.",
+  "equinox", "Orbital characteristics", "Reference coordinate system used to define the orbital elements; J2000 refers to the standard astronomical reference epoch.",
+  "orbit_class_type", "Orbital classification", "Short code identifying the asteroid's orbital classification, e.g. whether they approach (Amor), cross outside (Apollo), cross inside (Atens), or do not cross (Atira) Earth's orbit",
+  "orbit_class_description", "Orbital classification", "Written description of the asteroid's orbital classification.",
+  # Physical characteristics and potential hazards
+  "absolute_magnitude_h", "Physical characteristics", "Absolute magnitude (H), representing intrinsic brightness. Smaller values indicate brighter objects.",
+  "estimated_diameter_kilometers_min", "Physical characteristics", "Lower estimate of the asteroid's diameter in kilometres.",
+  "estimated_diameter_kilometers_max", "Physical characteristics", "Upper estimate of the asteroid's diameter in kilometres.",
+  "is_potentially_hazardous_asteroid", "Hazard classification", "TRUE or FALSE indicator of whether NASA classifies the asteroid as potentially hazardous.",
+  # Close approach information
+  "orbiting_body0", "Close approach 1", "First recorded celestial body approached by the asteroid.",
+  "miss_distance_kilometers0", "Close approach 1", "Distance to the first recorded celestial body at closest approach, in kilometres.",
+  "relative_velocity0", "Close approach 1", "Velocity relative to the first recorded celestial body at closest approach, in km/s.",
+  
+  "orbiting_body1", "Close approach 2", "Second recorded celestial body approached by the asteroid.",
+  "miss_distance_kilometers1", "Close approach 2", "Distance to the second recorded celestial body at closest approach, in kilometres.",
+  "relative_velocity1", "Close approach 2", "Velocity relative to the second recorded celestial body at closest approach, in km/s.",
+  
+  "orbiting_body2", "Close approach 3", "Third recorded celestial body approached by the asteroid.",
+  "miss_distance_kilometers2", "Close approach 3", "Distance to the third recorded celestial body at closest approach, in kilometres.",
+  "relative_velocity2", "Close approach 3", "Velocity relative to the third recorded celestial body at closest approach, in km/s.",
+  
+  "orbiting_body3", "Close approach 4", "Fourth recorded celestial body approached by the asteroid.",
+  "miss_distance_kilometers3", "Close approach 4", "Distance to the fourth recorded celestial body at closest approach, in kilometres.",
+  "relative_velocity3", "Close approach 4", "Velocity relative to the fourth recorded celestial body at closest approach, in km/s."
+)
 ```
 
 ALFIE'S WORKSPACE:
