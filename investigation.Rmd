@@ -101,4 +101,39 @@ variable_reference <-  tribble(
 ```
 
 
+Brook's Workspace:
+```{r}
+#Basic consideration, what percent of asteroids are hazardous -
+neo_dur_df %>%
+  summarise(
+    total = n(),
+    hazardous = sum(is_potentially_hazardous_asteroid, na.rm = TRUE),
+    percentage = mean(is_potentially_hazardous_asteroid, na.rm = TRUE) * 100 
+  )
+#Graph this -
+neo_dur_df %>%
+  count(is_potentially_hazardous_asteroid) %>%
+  mutate(
+    percentage = 100 * n / sum(n),
+    status = if_else(is_potentially_hazardous_asteroid, "Hazardous", "Not hazardous") 
+    ) %>%
+  ggplot(aes(x = status, y = percentage, fill = status)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(percentage, 2), "%")),
+            vjust = -0.5) +
+  scale_fill_manual(values = c(
+    "Hazardous" = "red",
+    "Not hazardous" = "steelblue"
+  )) +
+  labs(
+    title = "Percent of potentially hazardous aestoriods",
+    x = "Classification",
+    y = " percentage" ) +
+  ylim(0, 100) +
+  theme_minimal() 
+  
+  
+
+
+```
 
