@@ -201,7 +201,8 @@ ggplot(asteroids_analysis,
 
 Jonah's Workspace
 ```{r}
-neo_dur %>%
+# Classifying NEOs based on how close they got to Earth and then comparing this to whether they were deemed hazardous. Less than ~7.5M km is considered a close miss.
+neo_dur_df %>%
   filter(orbiting_body0 == "Earth") %>%
   mutate(
     is_close_miss = case_when(
@@ -217,7 +218,8 @@ neo_dur %>%
     y = "hazardous (true / false"
       )
 
-neo_dur %>%
+# Investigating the relationship between miss distance, relative velocity and hazard assessment.
+neo_dur_df %>%
   filter(orbiting_body0 == "Earth") %>%
   ggplot(aes(miss_distance_kilometers0, relative_velocity0, color = is_potentially_hazardous_asteroid)) +
   geom_smooth(method = "lm", se = FALSE) +
@@ -225,7 +227,7 @@ neo_dur %>%
     subtitle = "Comparison of Miss Distance and Relative Velocity (first observation) of objects approaching Earth",
     x = "first measured miss distance (km)",
     y = "first measured relative velocity (km)",
-    color = "hazard assessment"
+    color = "hazardous"
   )
 ```
 
