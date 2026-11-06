@@ -126,7 +126,7 @@ neo_dur_df %>%
     hazardous = sum(is_potentially_hazardous_asteroid, na.rm = TRUE),
     percentage = mean(is_potentially_hazardous_asteroid, na.rm = TRUE) * 100 
   )
-#Graph this -
+#Graph for this 
 neo_dur_df %>%
   count(is_potentially_hazardous_asteroid) %>%
   mutate(
@@ -148,8 +148,31 @@ neo_dur_df %>%
   ylim(0, 100) +
   theme_minimal() 
   
+#Consider how this relates to orbit type - 
+#APO — Apollo Earth-crossing asteroids whose semi-major axes are larger than Earth's. Their orbits extend farther from the Sun on average, but can cross Earth's orbital path.
+#ATE — Aten Earth-crossing asteroids whose semi-major axes are smaller than Earth's. They orbit closer to the Sun on average and have orbital periods shorter than one year.
+#AMO — Amor Asteroids that approach Earth's orbit from the outside but do not cross it. Their closest distance to the Sun is slightly beyond Earth's farthest distance from the Sun.
+#IEO — Interior Earth Object (Atira) Asteroids with orbits entirely inside Earth's orbital path. Their maximum distance from the Sun is smaller than Earth's minimum distance from the Sun.
+
+orbit_summary <- neo_dur_df %>%
+  group_by(orbit_class_type) %>%
+  summarise (
+    total =n(),
+    hazardous = sum(is_potentially_hazardous_asteroid),
+    percentage = 100*hazardous / total
+  ) 
   
-
-
+ggplot(orbit_summary,
+       aes(x=orbit_class_type, y=percentage, fill = orbit_class_type))+
+  geom_col()+
+  geom_text(aes(label = paste0(round(percentage, 1), "%")), vjust = -0.5)+
+  scale_fill_manual(values =c(
+    "AMO" = "steelblue",
+    "APO" = "red",
+    "ATE" = "orange",
+    "IEO" = "purple"
+  ))+
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
