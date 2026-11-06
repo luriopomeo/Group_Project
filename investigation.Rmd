@@ -1,6 +1,6 @@
 ---
 title: "IDS investigation worksheet"
-author: "by Mean Girls: Alfie, Kate, Brook, Jonah & Lucio"
+author: "by Team-Name: User1, User2, User3, User4 & User5"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -11,6 +11,23 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+```kate
+Introduction
+
+Many complex phenomena in nature can be investigated by identifying a relatively small number of underlying physical parameters. We were interested in exploring whether this approach could help us understand the classification of near-Earth asteroids.
+
+Given our shared interest in physics and space, we decided to investigate the following question:
+
+What physical and orbital characteristics (such as absolute magnitude, estimated diameter, and velocity) are the strongest indicators of whether a near-Earth asteroid is classified as potentially hazardous by NASA?
+
+Based on basic physical considerations, we initially hypothesised that three parameters would be particularly relevant: distance from Earth, velocity and mass.
+
+Our reasoning is that an asteroid's proximity to Earth determines how close it can approach our planet, while its mass and velocity determine its kinetic energy and, consequently, its potential impact energy.
+
+Using the available NASA dataset, we aim to investigate the relationships between these parameters and the official hazard classification. Rather than assuming that our initial hypotheses are correct, we will use statistical analysis to assess the relative importance of each characteristic and identify which parameters provide the strongest indication of an asteroid's potential hazard.
+
+We also recognise that other characteristics may be relevant, and that our initial selection represents a simplification. Depending on our findings and the limitations of the available data, we may explore additional variables and possible improvements to our analysis.
 ```
 
 
@@ -46,23 +63,5 @@ View(neo_dur_df)
 
 ```
 
-ALFIE'S WORKSPACE:
-
-
-```{r}
-# Checking parameters for potentially hazardous NEOs as described above for minimum measurements
-neo_dur_df %>%
-  filter(
-    estimated_diameter_kilometers_min > 0.14,
-    
-         )
-
-
-
-
-
-
-
-```
 
 
