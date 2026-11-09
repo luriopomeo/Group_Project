@@ -172,6 +172,7 @@ individual_observations <- neo_dur_df %>%
   
 
 ```
+
 ```{r}
 library(tidyverse)
 asteroids_analysis <- neo_dur_df %>%
@@ -198,6 +199,43 @@ ggplot(asteroids_analysis,
   scale_y_continuous(labels = scales::percent) +
   theme_minimal()
 ```
+
+```{r}
+#Displaying a density graph of relative velocities of NEOs 
+
+ggplot(
+  data = individual_observations,
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+```
+```{r}
+#Displaying a density graph of miss distances for NEOs
+
+ggplot(
+  data = individual_observations,
+  mapping = aes(
+    x = miss_distance_kilometers,
+    colour = is_potentially_hazardous_asteroid
+  )
+) +
+  geom_density() +
+  labs(
+    x = "Miss Distance (Km)",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+  
+```
+
+
 
 Jonah's Workspace
 ```{r}
