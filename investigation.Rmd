@@ -269,9 +269,55 @@ neo_dur_df %>%
   )
 ```
 
+Lucio Di Meo
 
+Asteroid eccentricity is a measure of the elipticallity of it's orbit around the sun. A high orbital eccentricity could mean as their path is more stretched they could more routinely cross paths with other planet's orbital paths more often.
+I would like to see if this increases the risk of it being potentially hazardous.
+
+orbit id vs id 
+orbit_id (Orbital Solution ID): NASA/JPL assigns an orbit_id to a specific mathematical model or orbital fit calculated by astronomers using a batch of telescope and radar observations. Because astronomers use the same calculated orbital solution model across multiple observation dates or apply a single orbital fit to groups of related data, many different close-approach entries share the exact same orbit_id. This results in a much smaller pool of unique orbit IDs (around 500).
+id (or Record ID): In close-approach datasets, each row represents a specific flyby event—a unique instance of an asteroid passing near Earth on a specific date, with its own calculated miss distance and relative velocity. With around 25,000 entries, you are looking at thousands of individual close-approach events.
 ```{r}
-#Lucio's Chunk
-```
 
+
+#eccentricity of orbit
+orbit_eccentricity <- neo_dur_df |> #orbit id as a tracker of a particular asteroids orbit as can change if measure
+  filter(estimated_diameter_kilometers_max > 0.140) |>  # as won't be large enough to be hazardous if smaller regardless.
+  select(id,eccentricity,minimum_orbit_intersection,is_potentially_hazardous_asteroid) |> 
+  mutate(is_potentially_hazardous_asteroid = as.factor(is_potentially_hazardous_asteroid)) 
+  
+ggplot(orbit_eccentricity, aes(x = is_potentially_hazardous_asteroid, y = eccentricity, fill = is_potentially_hazardous_asteroid)) +
+geom_boxplot(alpha = 0.7) +
+labs(
+  title = "Orbital Eccentricity by Hazard Status",
+  subtitle = "Filtered for asteroids > 140 meters",
+  x = "Potentially Hazardous Asteroid",
+  y = "Orbital Eccentricity",
+  fill = "Hazardous"
+) +
+theme_minimal()
+```
+Although potentially hazardous asteroids exhibit a slightly higher median orbital eccentricity (~0.56) compared to non-hazardous objects (~0.48), the high degree of overlap between the two distributions indicates that eccentricity alone is insufficient to classify hazard status. This highlights the necessity of multi-variable classification models, as proximity (MOID) and exact orbital alignment must be factored in alongside orbital shape.
+```{r}
+hazard_model <- glm(
+  is_potentially_hazardous_asteroid ~ eccentricity + minimum_orbit_intersection,
+  data = orbit_eccentricity,
+  family = binomial
+)
+
+# View the model summary and coefficients
+summary(hazard_model)
+```
+To analyze how orbital eccentricity and Minimum Orbit Intersection Distance (MOID) predict whether an asteroid is classified as potentially hazardous (after filtering for objects larger than 140 meters), the fitted logistic regression model provides the following specific insights:
+Model Equation
+Log-odds(Hazardous)=1.0988+1.9064(eccentricity)−61.7556(MOID)
+Interpretation of Results
+Orbital Eccentricity (Coefficient = 1.9064, p<2e−16):
+The positive coefficient indicates that as an asteroid's orbital eccentricity increases, the log-odds of it being classified as potentially hazardous also increase.
+Because p<2e−16, this relationship is statistically significant, confirming that more elongated, elliptical orbits are associated with a higher likelihood of hazard status.
+Minimum Orbit Intersection Distance (Coefficient = −61.7556, p<2e−16):
+The strongly negative coefficient means that as an asteroid's MOID decreases (meaning its orbit brings it closer to Earth's path), the likelihood of being classified as hazardous increases sharply.
+Due to its massive magnitude (z=−41.536), MOID acts as the dominant geometric driver in the model, directly reflecting NASA's formal proximity threshold of ≤0.05 AU.
+Model Fit
+Deviance Reduction: The residual deviance dropped from 12,729.7 (Null deviance) to 5,576.5 on 13,007 degrees of freedom, indicating that combining eccentricity and MOID explains a substantial amount of the variation in asteroid hazard classification.
 
