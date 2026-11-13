@@ -174,33 +174,6 @@ individual_observations <- neo_dur_df %>%
 ```
 
 ```{r}
-library(tidyverse)
-asteroids_analysis <- neo_dur_df %>%
-  rowwise() %>%
-  mutate(
-    changed_planet = n_distinct(c(
-      orbiting_body0,
-      orbiting_body1,
-      orbiting_body2,
-      orbiting_body3
-    )) > 1
-  ) %>%
-  ungroup()
-
-ggplot(asteroids_analysis,
-       aes(x = changed_planet, fill = is_potentially_hazardous_asteroid)) +
-  geom_bar(position = "fill") +
-  labs(
-    title = "Hazardous Asteroids and Changes in Orbital Planet",
-    x = "Did the asteroid change its orbital planet?",
-    y = "Proportion of asteroids",
-    fill = "Hazardous"
-  ) +
-  scale_y_continuous(labels = scales::percent) +
-  theme_minimal()
-```
-
-```{r}
 #Displaying a density graph of relative velocities of NEOs 
 
 ggplot(
@@ -320,4 +293,189 @@ The strongly negative coefficient means that as an asteroid's MOID decreases (me
 Due to its massive magnitude (z=−41.536), MOID acts as the dominant geometric driver in the model, directly reflecting NASA's formal proximity threshold of ≤0.05 AU.
 Model Fit
 Deviance Reduction: The residual deviance dropped from 12,729.7 (Null deviance) to 5,576.5 on 13,007 degrees of freedom, indicating that combining eccentricity and MOID explains a substantial amount of the variation in asteroid hazard classification.
+
+Kate's workspace
+
+```{r}
+library(tidyverse)
+asteroids_analysis <- neo_dur_df %>%
+  rowwise() %>%
+  mutate(
+    changed_planet = n_distinct(c(
+      orbiting_body0,
+      orbiting_body1,
+      orbiting_body2,
+      orbiting_body3
+    )) > 1
+  ) %>%
+  ungroup()
+
+ggplot(asteroids_analysis,
+       aes(x = changed_planet, fill = is_potentially_hazardous_asteroid)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Hazardous Asteroids and Changes in Orbital Planet",
+    x = "Did the asteroid change its orbital planet?",
+    y = "Proportion of asteroids",
+    fill = "Hazardous"
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  theme_minimal()
+
+```
+
+```{r}
+library(tidyverse)
+library(broom)
+library(pROC)
+asteroids_model <- neo_dur_df %>%
+  mutate(
+    diameter = (
+      estimated_diameter_kilometers_min +
+      estimated_diameter_kilometers_max
+    ) / 2,
+
+    changed_body = pmap_lgl(
+      select(
+        .,
+        orbiting_body0,
+        orbiting_body1,
+        orbiting_body2,
+        orbiting_body3
+      ),
+      function(...) {
+        bodies <- c(...)
+        bodies <- bodies[!is.na(bodies) & bodies != ""]
+        n_distinct(bodies) > 1
+      }
+    )
+  ) %>%
+  select(
+    id,
+    is_potentially_hazardous_asteroid,
+    diameter,
+    eccentricity,
+    inclination,
+    semi_major_axis,
+    jupiter_tisserand_invariant,
+    changed_body
+  )
+glimpse(asteroids_model)
+table(asteroids_model$is_potentially_hazardous_asteroid)
+table(asteroids_model$changed_body)
+```
+
+```{r}
+"Dataset preparation
+
+The initial modelling dataset was expanded by adding further orbital and observational characteristics from the original dataset. These variables were selected to investigate a broader range of potential predictors of asteroid hazard classification, including orbital properties and the quality and extent of observational data."
+
+asteroids_model <- asteroids_model %>%
+  bind_cols(
+    neo_dur_df %>%
+      select(
+        orbital_period,
+        perihelion_distance,
+        aphelion_distance,
+        mean_motion,
+        ascending_node_longitude,
+        perihelion_argument,
+        mean_anomaly,
+        orbit_uncertainty,
+        data_arc_in_days,
+        observations_used
+      )
+  )
+"Initial logistic regression model
+
+A multiple logistic regression model was fitted to investigate the relationship between asteroid characteristics and their potentially hazardous classification. Logistic regression was chosen because the response variable is binary, indicating whether an asteroid is classified as potentially hazardous or not.
+
+The initial model included 16 candidate predictors, covering physical characteristics, orbital parameters and observational information. This provided a broad starting point for examining which variables were associated with the hazard classification."
+full_model <- glm(
+  is_potentially_hazardous_asteroid ~
+    diameter +
+    eccentricity +
+    inclination +
+    semi_major_axis +
+    jupiter_tisserand_invariant +
+    changed_body +
+    orbital_period +
+    perihelion_distance +
+    aphelion_distance +
+    mean_motion +
+    ascending_node_longitude +
+    perihelion_argument +
+    mean_anomaly +
+    orbit_uncertainty +
+    data_arc_in_days +
+    observations_used,
+  data = asteroids_model,
+  family = binomial
+)
+
+summary(full_model)
+
+correlations <- asteroids_model %>%
+  select(
+    -id,
+    -is_potentially_hazardous_asteroid,
+    -changed_body
+  ) %>%
+  cor(use = "pairwise.complete.obs")
+
+correlations %>%
+  as.data.frame() %>%
+  rownames_to_column("variable") %>%
+  pivot_longer(
+    cols = -variable,
+    names_to = "other_variable",
+    values_to = "correlation"
+  ) %>%
+  filter(
+    variable < other_variable,
+    abs(correlation) > 0.8
+  ) %>%
+  arrange(desc(abs(correlation)))
+
+"Correlation analysis
+
+A correlation analysis was conducted to identify strong relationships between the numerical predictor variables and assess potential multicollinearity in the initial model. Pearson correlation coefficients were calculated for all pairs of numerical variables, using pairwise complete observations.
+
+Pairs with an absolute correlation coefficient greater than 0.8 were identified as potentially highly correlated. Several strong relationships were found, particularly between orbital period and semi-major axis (r = 0.995), and between the Jupiter Tisserand invariant and mean motion (r = 0.991). These results suggested that some predictors contained overlapping information, which could make individual regression coefficients difficult to interpret."
+
+reduced_model <- glm(
+  is_potentially_hazardous_asteroid ~
+    diameter +
+    eccentricity +
+    inclination +
+    semi_major_axis +
+    jupiter_tisserand_invariant +
+    changed_body +
+    perihelion_distance +
+    orbit_uncertainty +
+    data_arc_in_days +
+    observations_used,
+  data = asteroids_model,
+  family = binomial
+)
+
+summary(reduced_model)
+"Reduced logistic regression model
+
+Based on the correlation analysis, we hypothesised that some predictors might provide overlapping information due to their strong relationships with other orbital parameters. To investigate this, we fitted a second, reduced logistic regression model, excluding several potentially redundant variables.
+
+The reduced model retained 10 predictors, while removing orbital period, aphelion distance, mean motion, ascending node longitude, perihelion argument and mean anomaly. The aim was to determine whether a simpler model could achieve a comparable fit while reducing the number of predictors."
+anova(reduced_model, full_model, test = "Chisq")
+
+" Comparison of the Full and Reduced Models
+
+During our previous lesson, we discussed the concept of adjusted \(R^2\), which accounts for the number of predictors in a model and penalises the inclusion of variables that do not sufficiently improve its explanatory power. This made me interested in applying a similar approach to comparing our full and reduced models. Although I expected the full model to provide a better fit simply because it included more predictors, I wanted to investigate whether the additional variables actually provided enough information to justify the increased complexity. After looking into methods suitable for logistic regression, I found that the Akaike Information Criterion (AIC) could be used to compare models while taking their complexity into account. I therefore calculated the AIC for both models and also performed a likelihood ratio test using `anova()` with the Chi-squared test.
+
+The full model had a lower AIC (12,534) than the reduced model (12,629), indicating a better balance between model fit and complexity. The likelihood ratio test also showed that the improvement in fit was statistically significant (\(\chi^2 = 104.99\), \(df = 5\), \(p < 2.2 \times 10^{-16}\)). This suggests that the predictors excluded from the reduced model collectively provide significant additional information, despite some of them being strongly correlated with other variables.
+
+ Initial Conclusion
+
+Since the main aim of our project is to identify which asteroid characteristics are most strongly associated with potentially hazardous classification, retaining relevant information in the model is particularly important. Although the correlation analysis suggested that some predictors contain overlapping information, removing them resulted in a substantial deterioration in model fit. Therefore, the full model was retained as the preferred candidate for further analysis. At this stage, we cannot assume that strongly correlated predictors are unnecessary or that their individual contributions can be ignored. Instead, we need to investigate their effects further, while taking potential multicollinearity into account. The predictive performance of the model on unseen data will also need to be assessed before drawing a final conclusion."
+```
+
 
