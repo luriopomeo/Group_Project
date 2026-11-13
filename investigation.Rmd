@@ -366,9 +366,9 @@ table(asteroids_model$changed_body)
 ```
 
 ```{r}
-Dataset preparation
+#Dataset preparation
 
-The initial modelling dataset was expanded by adding further orbital and observational characteristics from the original dataset. These variables were selected to investigate a broader range of potential predictors of asteroid hazard classification, including orbital properties and the quality and extent of observational data.
+#The initial modelling dataset was expanded by adding further orbital and observational characteristics from the original dataset. These variables were selected to investigate a broader range of potential predictors of asteroid hazard classification, including orbital properties and the quality and extent of observational data.
 
 asteroids_model <- asteroids_model %>%
   bind_cols(
@@ -386,11 +386,12 @@ asteroids_model <- asteroids_model %>%
         observations_used
       )
   )
-Initial logistic regression model
+#Initial logistic regression model
 
-A multiple logistic regression model was fitted to investigate the relationship between asteroid characteristics and their potentially hazardous classification. Logistic regression was chosen because the response variable is binary, indicating whether an asteroid is classified as potentially hazardous or not.
+#A multiple logistic regression model was fitted to investigate the relationship between asteroid characteristics and their potentially hazardous classification. Logistic regression was chosen because the response variable is binary, indicating whether an asteroid is classified as potentially hazardous or not.
 
-The initial model included 16 candidate predictors, covering physical characteristics, orbital parameters and observational information. This provided a broad starting point for examining which variables were associated with the hazard classification.
+# The initial model included 16 candidate predictors, covering physical characteristics, orbital parameters and observational information. This provided a broad starting point for examining which variables were associated with the hazard classification.
+
 full_model <- glm(
   is_potentially_hazardous_asteroid ~
     diameter +
@@ -437,11 +438,11 @@ correlations %>%
   ) %>%
   arrange(desc(abs(correlation)))
 
-Correlation analysis
+#Correlation analysis
 
-A correlation analysis was conducted to identify strong relationships between the numerical predictor variables and assess potential multicollinearity in the initial model. Pearson correlation coefficients were calculated for all pairs of numerical variables, using pairwise complete observations.
+#A correlation analysis was conducted to identify strong relationships between the numerical predictor variables and assess potential multicollinearity in the initial model. Pearson correlation coefficients were calculated for all pairs of numerical variables, using pairwise complete observations.
 
-Pairs with an absolute correlation coefficient greater than 0.8 were identified as potentially highly correlated. Several strong relationships were found, particularly between orbital period and semi-major axis (r = 0.995), and between the Jupiter Tisserand invariant and mean motion (r = 0.991). These results suggested that some predictors contained overlapping information, which could make individual regression coefficients difficult to interpret.
+# Pairs with an absolute correlation coefficient greater than 0.8 were identified as potentially highly correlated. Several strong relationships were found, particularly between orbital period and semi-major axis (r = 0.995), and between the Jupiter Tisserand invariant and mean motion (r = 0.991). These results suggested that some predictors contained overlapping information, which could make individual regression coefficients difficult to interpret.
 
 reduced_model <- glm(
   is_potentially_hazardous_asteroid ~
@@ -460,22 +461,25 @@ reduced_model <- glm(
 )
 
 summary(reduced_model)
-Reduced logistic regression model
 
-Based on the correlation analysis, we hypothesised that some predictors might provide overlapping information due to their strong relationships with other orbital parameters. To investigate this, we fitted a second, reduced logistic regression model, excluding several potentially redundant variables.
+# Reduced logistic regression model
 
-The reduced model retained 10 predictors, while removing orbital period, aphelion distance, mean motion, ascending node longitude, perihelion argument and mean anomaly. The aim was to determine whether a simpler model could achieve a comparable fit while reducing the number of predictors.
+# Based on the correlation analysis, we hypothesised that some predictors might provide overlapping information due to their strong relationships with other orbital parameters. To investigate this, we fitted a second, reduced logistic regression model, excluding several potentially redundant variables.
+
+# The reduced model retained 10 predictors, while removing orbital period, aphelion distance, mean motion, ascending node longitude, perihelion argument and mean anomaly. The aim was to determine whether a simpler model could achieve a comparable fit while reducing the number of predictors.
+
 anova(reduced_model, full_model, test = "Chisq")
 
- Comparison of the Full and Reduced Models
+# Comparison of the Full and Reduced Models
 
-During our previous lesson, we discussed the concept of adjusted \(R^2\), which accounts for the number of predictors in a model and penalises the inclusion of variables that do not sufficiently improve its explanatory power. This made me interested in applying a similar approach to comparing our full and reduced models. Although I expected the full model to provide a better fit simply because it included more predictors, I wanted to investigate whether the additional variables actually provided enough information to justify the increased complexity. After looking into methods suitable for logistic regression, I found that the Akaike Information Criterion (AIC) could be used to compare models while taking their complexity into account. I therefore calculated the AIC for both models and also performed a likelihood ratio test using `anova()` with the Chi-squared test.
+# During our previous lesson, we discussed the concept of adjusted \(R^2\), which accounts for the number of predictors in a model and penalises the inclusion of variables that do not sufficiently improve its explanatory power. This made me interested in applying a similar approach to comparing our full and reduced models. Although I expected the full model to provide a better fit simply because it included more predictors, I wanted to investigate whether the additional variables actually provided enough information to justify the increased complexity. After looking into methods suitable for logistic regression, I found that the Akaike Information Criterion (AIC) could be used to compare models while taking their complexity into account. I therefore calculated the AIC for both models and also performed a likelihood ratio test using `anova()` with the Chi-squared test.
 
-The full model had a lower AIC (12,534) than the reduced model (12,629), indicating a better balance between model fit and complexity. The likelihood ratio test also showed that the improvement in fit was statistically significant (\(\chi^2 = 104.99\), \(df = 5\), \(p < 2.2 \times 10^{-16}\)). This suggests that the predictors excluded from the reduced model collectively provide significant additional information, despite some of them being strongly correlated with other variables.
+# The full model had a lower AIC (12,534) than the reduced model (12,629), indicating a better balance between model fit and complexity. The likelihood ratio test also showed that the improvement in fit was statistically significant (\(\chi^2 = 104.99\), \(df = 5\), \(p < 2.2 \times 10^{-16}\)). This suggests that the predictors excluded from the reduced model collectively provide significant additional information, despite some of them being strongly correlated with other variables.
 
- Initial Conclusion
+# Initial Conclusion
 
-Since the main aim of our project is to identify which asteroid characteristics are most strongly associated with potentially hazardous classification, retaining relevant information in the model is particularly important. Although the correlation analysis suggested that some predictors contain overlapping information, removing them resulted in a substantial deterioration in model fit. Therefore, the full model was retained as the preferred candidate for further analysis. At this stage, we cannot assume that strongly correlated predictors are unnecessary or that their individual contributions can be ignored. Instead, we need to investigate their effects further, while taking potential multicollinearity into account. The predictive performance of the model on unseen data will also need to be assessed before drawing a final conclusion.
+# Since the main aim of our project is to identify which asteroid characteristics are most strongly associated with potentially hazardous classification, retaining relevant information in the model is particularly important. Although the correlation analysis suggested that some predictors contain overlapping information, removing them resulted in a substantial deterioration in model fit. Therefore, the full model was retained as the preferred candidate for further analysis. At this stage, we cannot assume that strongly correlated predictors are unnecessary or that their individual contributions can be ignored. Instead, we need to investigate their effects further, while taking potential multicollinearity into account. The predictive performance of the model on unseen data will also need to be assessed before drawing a final conclusion.
+
 ```
 
 
