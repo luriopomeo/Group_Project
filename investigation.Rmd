@@ -188,6 +188,55 @@ ggplot(
     y = "Density",
     colour = "Potentially Hazardous"
   )
+
+ggplot(
+  data = neo_dur_df,
+  mapping = aes(
+    x = relative_velocity0,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+ggplot(
+  data = neo_dur_df,
+  mapping = aes(
+    x = relative_velocity1,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+ggplot(
+  data = neo_dur_df,
+  mapping = aes(
+    x = relative_velocity2,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+ggplot(
+  data = neo_dur_df,
+  mapping = aes(
+    x = relative_velocity3,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
 ```
 ```{r}
 #Displaying a density graph of miss distances for NEOs
