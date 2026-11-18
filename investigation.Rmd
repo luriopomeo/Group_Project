@@ -188,55 +188,6 @@ ggplot(
     y = "Density",
     colour = "Potentially Hazardous"
   )
-
-ggplot(
-  data = neo_dur_df,
-  mapping = aes(
-    x = relative_velocity0,
-    colour = is_potentially_hazardous_asteroid)
-  ) +
-  geom_density() +
-  labs(
-    x = "Relative Velocity",
-    y = "Density",
-    colour = "Potentially Hazardous"
-  )
-ggplot(
-  data = neo_dur_df,
-  mapping = aes(
-    x = relative_velocity1,
-    colour = is_potentially_hazardous_asteroid)
-  ) +
-  geom_density() +
-  labs(
-    x = "Relative Velocity",
-    y = "Density",
-    colour = "Potentially Hazardous"
-  )
-ggplot(
-  data = neo_dur_df,
-  mapping = aes(
-    x = relative_velocity2,
-    colour = is_potentially_hazardous_asteroid)
-  ) +
-  geom_density() +
-  labs(
-    x = "Relative Velocity",
-    y = "Density",
-    colour = "Potentially Hazardous"
-  )
-ggplot(
-  data = neo_dur_df,
-  mapping = aes(
-    x = relative_velocity3,
-    colour = is_potentially_hazardous_asteroid)
-  ) +
-  geom_density() +
-  labs(
-    x = "Relative Velocity",
-    y = "Density",
-    colour = "Potentially Hazardous"
-  )
 ```
 ```{r}
 #Displaying a density graph of miss distances for NEOs
@@ -376,7 +327,6 @@ ggplot(asteroids_analysis,
 ```{r}
 library(tidyverse)
 library(broom)
-library(pROC)
 asteroids_model <- neo_dur_df %>%
   mutate(
     diameter = (
@@ -419,22 +369,52 @@ table(asteroids_model$changed_body)
 
 #The initial modelling dataset was expanded by adding further orbital and observational characteristics from the original dataset. These variables were selected to investigate a broader range of potential predictors of asteroid hazard classification, including orbital properties and the quality and extent of observational data.
 
-asteroids_model <- asteroids_model %>%
-  bind_cols(
-    neo_dur_df %>%
+asteroids_model <- neo_dur_df %>%
+  mutate(
+    diameter = (
+      estimated_diameter_kilometers_min +
+      estimated_diameter_kilometers_max
+    ) / 2,
+
+    changed_body = pmap_lgl(
       select(
-        orbital_period,
-        perihelion_distance,
-        aphelion_distance,
-        mean_motion,
-        ascending_node_longitude,
-        perihelion_argument,
-        mean_anomaly,
-        orbit_uncertainty,
-        data_arc_in_days,
-        observations_used
-      )
+        .,
+        orbiting_body0,
+        orbiting_body1,
+        orbiting_body2,
+        orbiting_body3
+      ),
+      function(...) {
+        bodies <- c(...)
+        bodies <- bodies[!is.na(bodies) & bodies != ""]
+        n_distinct(bodies) > 1
+      }
+    )
+  ) %>%
+  select(
+    id,
+    is_potentially_hazardous_asteroid,
+    diameter,
+    eccentricity,
+    inclination,
+    semi_major_axis,
+    jupiter_tisserand_invariant,
+    changed_body,
+    orbital_period,
+    perihelion_distance,
+    aphelion_distance,
+    mean_motion,
+    ascending_node_longitude,
+    perihelion_argument,
+    mean_anomaly,
+    orbit_uncertainty,
+    data_arc_in_days,
+    observations_used
   )
+```
+
+
+```{r}
 #Initial logistic regression model
 
 #A multiple logistic regression model was fitted to investigate the relationship between asteroid characteristics and their potentially hazardous classification. Logistic regression was chosen because the response variable is binary, indicating whether an asteroid is classified as potentially hazardous or not.
@@ -486,7 +466,10 @@ correlations %>%
     abs(correlation) > 0.8
   ) %>%
   arrange(desc(abs(correlation)))
+```
 
+
+```{r}
 #Correlation analysis
 
 #A correlation analysis was conducted to identify strong relationships between the numerical predictor variables and assess potential multicollinearity in the initial model. Pearson correlation coefficients were calculated for all pairs of numerical variables, using pairwise complete observations.
@@ -510,7 +493,10 @@ reduced_model <- glm(
 )
 
 summary(reduced_model)
+```
 
+
+```{r}
 # Reduced logistic regression model
 
 # Based on the correlation analysis, we hypothesised that some predictors might provide overlapping information due to their strong relationships with other orbital parameters. To investigate this, we fitted a second, reduced logistic regression model, excluding several potentially redundant variables.
