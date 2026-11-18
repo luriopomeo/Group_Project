@@ -20,8 +20,6 @@ library(tidyverse)
 library(ggplot2)
 # Add any other libraries here
 
-
-
 ```
 
 Question: What physical and orbital characteristics (such as absolute magnitude, estimated diameter, and velocity) are the strongest indicators of whether a near-Earth asteroid is classified as potentially hazardous?
@@ -100,6 +98,16 @@ variable_reference <-  tribble(
 )
 ```
 
+```{r}
+#only considering first planet specific observation (observation0) and filtering for only the ones relevant to earth
+
+near_earth_object_for_earth <- neo_dur_df |> 
+  select(-orbiting_body1, -orbiting_body2, -orbiting_body3,
+         -relative_velocity1,-relative_velocity2,-relative_velocity3,
+         -miss_distance_kilometers1, -miss_distance_kilometers2, -miss_distance_kilometers3) |> 
+  filter(orbiting_body0 == "Earth")
+near_earth_object_for_earth
+```
 
 Brook's Workspace:
 ```{r}
@@ -293,6 +301,8 @@ The strongly negative coefficient means that as an asteroid's MOID decreases (me
 Due to its massive magnitude (z=−41.536), MOID acts as the dominant geometric driver in the model, directly reflecting NASA's formal proximity threshold of ≤0.05 AU.
 Model Fit
 Deviance Reduction: The residual deviance dropped from 12,729.7 (Null deviance) to 5,576.5 on 13,007 degrees of freedom, indicating that combining eccentricity and MOID explains a substantial amount of the variation in asteroid hazard classification.
+
+
 
 Kate's workspace
 
