@@ -105,7 +105,11 @@ near_earth_object_for_earth <- neo_dur_df |>
   select(-orbiting_body1, -orbiting_body2, -orbiting_body3,
          -relative_velocity1,-relative_velocity2,-relative_velocity3,
          -miss_distance_kilometers1, -miss_distance_kilometers2, -miss_distance_kilometers3) |> 
-  filter(orbiting_body0 == "Earth")
+  filter(orbiting_body0 == "Earth") |> 
+  mutate(as.factor(is_potentially_hazardous_asteroid)) |> 
+  rename(is_hazardous = is_potentially_hazardous_asteroid)
+
+
 near_earth_object_for_earth
 ```
 
