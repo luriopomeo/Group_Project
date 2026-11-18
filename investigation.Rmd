@@ -336,6 +336,10 @@ individual_observations %>%
 
 ```{r}
 #Creating models to determine predictive power of variables
+neo_dur_df <- neo_dur_df %>%
+  mutate(is_potentially_hazardous_asteroid =
+           as.factor(is_potentially_hazardous_asteroid))
+
 set.seed(6767)
 neo_split <- initial_split(neo_dur_df)
 neo_train <- training(neo_split)
@@ -353,14 +357,26 @@ neo_wflow_1 <- workflow() %>%
   add_recipe(neo_rec_1) %>%
   add_model(neo_mod_1)
 
-#neo_fit_1 <- fit(neo_wflow_1, data = neo_train)
-#neo_predictions <- augment(neo_fit_1, new_data = neo_test)
+neo_fit_1 <- fit(neo_wflow_1, data = neo_train)
+neo_predictions <- augment(neo_fit_1, new_data = neo_test)
 
-#neo_roc <- roc_curve(
- # neo_predictions,
-  #truth = is_potentially_hazardous_asteroid,
-#  .pred_TRUE) %>%
-#  autoplot()
+neo_roc <- roc_curve(
+  neo_predictions,
+  truth = is_potentially_hazardous_asteroid,
+  .pred_TRUE,
+  event_level = "second")
+
+autoplot(neo_roc) +
+  labs(
+    title = "Relative Velocity 0"
+  )
+
+neo_predictions %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  )
 
 
 ```
