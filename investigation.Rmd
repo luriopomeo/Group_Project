@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load-lib, message = FALSE}
 library(tidyverse)
 library(ggplot2)
+library(tidymodels)
 # Add any other libraries here
 
 
@@ -188,61 +189,11 @@ ggplot(
     y = "Density",
     colour = "Potentially Hazardous"
   )
-
-ggplot(
-  data = neo_dur_df,
-  mapping = aes(
-    x = relative_velocity0,
-    colour = is_potentially_hazardous_asteroid)
-  ) +
-  geom_density() +
-  labs(
-    x = "Relative Velocity",
-    y = "Density",
-    colour = "Potentially Hazardous"
-  )
-ggplot(
-  data = neo_dur_df,
-  mapping = aes(
-    x = relative_velocity1,
-    colour = is_potentially_hazardous_asteroid)
-  ) +
-  geom_density() +
-  labs(
-    x = "Relative Velocity",
-    y = "Density",
-    colour = "Potentially Hazardous"
-  )
-ggplot(
-  data = neo_dur_df,
-  mapping = aes(
-    x = relative_velocity2,
-    colour = is_potentially_hazardous_asteroid)
-  ) +
-  geom_density() +
-  labs(
-    x = "Relative Velocity",
-    y = "Density",
-    colour = "Potentially Hazardous"
-  )
-ggplot(
-  data = neo_dur_df,
-  mapping = aes(
-    x = relative_velocity3,
-    colour = is_potentially_hazardous_asteroid)
-  ) +
-  geom_density() +
-  labs(
-    x = "Relative Velocity",
-    y = "Density",
-    colour = "Potentially Hazardous"
-  )
 ```
 ```{r}
 #Displaying a density graph of miss distances for NEOs
-
-ggplot(
-  data = individual_observations,
+individual_observations %>%
+  ggplot(
   mapping = aes(
     x = miss_distance_kilometers,
     colour = is_potentially_hazardous_asteroid
@@ -256,6 +207,153 @@ ggplot(
   )
   
 ```
+```{r}
+individual_observations %>%
+  filter(
+    orbiting_body == "Earth"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Earth",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Moon"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Moon",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Juptr"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Jupiter",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Venus"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Venus",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Mars"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Mars",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Merc"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Mercury",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Satrn"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Saturn",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+```
+
+```{r}
+#Creating models to determine predictive power of variables
+set.seed(6767)
+neo_split <- initial_split(neo_dur_df)
+neo_train <- training(neo_split)
+neo_test <- testing(neo_split)
+
+
+neo_rec_1 <- recipe(
+  is_potentially_hazardous_asteroid ~ relative_velocity0,
+  data = neo_dur_df
+)
+neo_mod_1 <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_1 <- workflow() %>%
+  add_recipe(neo_rec_1) %>%
+  add_model(neo_mod_1)
+
+#neo_fit_1 <- fit(neo_wflow_1, data = neo_train)
+#neo_predictions <- augment(neo_fit_1, new_data = neo_test)
+
+#neo_roc <- roc_curve(
+ # neo_predictions,
+  #truth = is_potentially_hazardous_asteroid,
+#  .pred_TRUE) %>%
+#  autoplot()
+
+
+```
+
+
 
 
 
