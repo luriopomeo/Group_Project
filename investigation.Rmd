@@ -40,9 +40,7 @@ https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-fu
 ```{r load-data}
 # load your data 
 nearest_earth_objects <- read_csv("data/nearest-earth-objects(1910-2024).csv")
-view(nearest_earth_objects)
 neo_dur_df <- read_csv("data/neo_dur_df.csv")
-View(neo_dur_df)
 variable_reference <-  tribble(
   ~variable, ~category, ~description,
   # Identification and observation information
@@ -404,10 +402,18 @@ neo_dur_df %>%
     y = "hazardous (true / false"
       )
 
+# There is no "threshold" for miss_distance above which neos are not classified as hazardous
+ggplot(individual_observations, aes(miss_distance_kilometers, fill = is_potentially_hazardous_asteroid)) +
+  geom_density(alpha = 0.4) +
+  facet_wrap(~observation, scales = "fixed")
+  
+
+
 # Investigating the relationship between miss distance, relative velocity and hazard assessment.
 neo_dur_df %>%
   filter(orbiting_body0 == "Earth") %>%
   ggplot(aes(miss_distance_kilometers0, relative_velocity0, color = is_potentially_hazardous_asteroid)) +
+  geom_point(alpha = 0.05) +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
     subtitle = "Comparison of Miss Distance and Relative Velocity (first observation) of objects approaching Earth",
@@ -415,11 +421,18 @@ neo_dur_df %>%
     y = "first measured relative velocity (km)",
     color = "hazardous"
   )
+
+# investigating the distribution of relative_velocity0 and miss_distance_kilometers0 per orbiting_body0
+ggplot(neo_dur_df, aes(orbiting_body0, relative_velocity0, fill = is_potentially_hazardous_asteroid)) +
+  geom_boxplot()
+
+ggplot(neo_dur_df, aes(orbiting_body0, miss_distance_kilometers0, fill = is_potentially_hazardous_asteroid)) +
+  geom_boxplot()
 ```
 
 Lucio Di Meo
 
-Asteroid eccentricity is a measure of the elipticallity of it's orbit around the sun. A high orbital eccentricity could mean as their path is more stretched they could more routinely cross paths with other planet's orbital paths more often.
+Asteroid eccentricity i^s a measure of the elipticallity of it's orbit around the sun. A high orbital eccentricity could mean as their path is more stretched they could more routinely cross paths with other planet's orbital paths more often.
 I would like to see if this increases the risk of it being potentially hazardous.
 
 orbit id vs id 
