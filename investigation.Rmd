@@ -17,7 +17,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load-lib, message = FALSE}
 library(tidyverse)
-library(ggplot2)
 library(tidymodels)
 # Add any other libraries here
 
@@ -385,6 +384,8 @@ neo_predictions %>%
 
 Jonah's Workspace
 ```{r}
+### DATA VISUALISATIONS
+
 # Classifying NEOs based on how close they got to Earth and then comparing this to whether they were deemed hazardous. Less than ~7.5M km is considered a close miss.
 neo_dur_df %>%
   filter(orbiting_body0 == "Earth") %>%
@@ -405,7 +406,7 @@ neo_dur_df %>%
 # There is no "threshold" for miss_distance above which neos are not classified as hazardous
 ggplot(individual_observations, aes(miss_distance_kilometers, fill = is_potentially_hazardous_asteroid)) +
   geom_density(alpha = 0.4) +
-  facet_wrap(~observation, scales = "fixed")
+  facet_wrap(~ observation, scales = "fixed")
   
 
 
@@ -429,6 +430,69 @@ ggplot(neo_dur_df, aes(orbiting_body0, relative_velocity0, fill = is_potentially
 ggplot(neo_dur_df, aes(orbiting_body0, miss_distance_kilometers0, fill = is_potentially_hazardous_asteroid)) +
   geom_boxplot()
 ```
+```{r}
+### MODELS
+# Include all observations by using the pivoted dataframe: individual_observations
+neo_earth_model1 <- individual_observations %>%
+  filter(orbiting_body == "Earth") %>%
+  mutate(
+    is_potentially_hazardous_asteroid = as.factor(is_potentially_hazardous_asteroid)
+  )
+
+set.seed(6767)
+neo_split_model1 <- initial_split(neo_earth_model1)
+neo_train_model1 <- training(neo_split_model1)
+neo_test_model1  <- testing(neo_split_model1)
+
+neo_rec_model1 <- recipe(is_potentially_hazardous_asteroid ~ miss_distance_kilometers + relative_velocity, data = neo_train_model1) %>%
+  step_dummy(all_nominal(), -all_outcomes())
+  
+neo_mod <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow <- workflow() %>%
+  add_model(neo_mod) %>%
+  add_recipe(neo_rec_model1)
+
+neo_fit <- neo_wflow %>%
+  fit(data = neo_train_model1)
+
+hazard_pred <- predict(neo_fit, neo_test_model1, type = "prob") %>%
+  bind_cols(neo_test_model1)
+
+hazard_pred %>%
+  roc_curve(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+hazard_pred %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  )
+
+cutoff_prob <- 0.1
+
+hazard_pred %>%
+  mutate(
+    labelled_hazardous = if_else(
+      .pred_TRUE > cutoff_prob,
+      "labelled hazardous",
+      "labelled not hazardous"
+    )
+  ) %>%
+  count(labelled_hazardous, is_potentially_hazardous_asteroid) %>%
+  pivot_wider(names_from = is_potentially_hazardous_asteroid, values_from = n
+  )
+
+
+
+```
+
 
 Lucio Di Meo
 
