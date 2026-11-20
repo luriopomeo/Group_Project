@@ -505,7 +505,6 @@ reduced_model <- glm(
 summary(reduced_model)
 ```
 
-
 ```{r}
 # Reduced logistic regression model
 
