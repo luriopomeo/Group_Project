@@ -542,7 +542,9 @@ ggplot(neo_dur_df, aes(orbiting_body0, miss_distance_kilometers0, fill = is_pote
 ```
 ```{r}
 ### MODELS
+
 # Include all observations by using the pivoted dataframe: individual_observations
+
 neo_earth_model1 <- individual_observations %>%
   filter(orbiting_body == "Earth") %>%
   mutate(
@@ -602,6 +604,66 @@ hazard_pred %>%
 
 
 ```
+```{r}
+# cheat model (0.98 AUC)
+neo_dur_cheat_model <- neo_dur_df %>%
+  mutate(
+    is_potentially_hazardous_asteroid = factor(is_potentially_hazardous_asteroid,
+                       levels = c(FALSE, TRUE))
+    )
+
+set.seed(6767)
+neo_split_cheat <- initial_split(neo_dur_cheat_model)
+neo_train_cheat <- training(neo_split_cheat)
+neo_test_cheat  <- testing(neo_split_cheat)
+
+neo_rec_cheat <- recipe(is_potentially_hazardous_asteroid ~ minimum_orbit_intersection + absolute_magnitude_h, data = neo_train_cheat)
+
+neo_mod_cheat <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_cheat <- workflow() %>%
+  add_model(neo_mod_cheat) %>%
+  add_recipe(neo_rec_cheat)
+
+neo_fit_cheat <- neo_wflow_cheat %>%
+  fit(data = neo_train_cheat)
+
+hazard_pred_cheat <- predict(neo_fit_cheat, neo_test_cheat, type = "prob") %>%
+  bind_cols(neo_test_cheat)
+
+hazard_pred_cheat %>%
+  roc_curve(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+auc_magnitude_orbit_intersection <- hazard_pred_cheat %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  ) %>% select(.estimate) %>% pull()
+
+auc_magnitude_orbit_intersection
+
+cutoff_prob <- 0.1
+
+hazard_pred_cheat %>%
+  mutate(
+    labelled_hazardous = if_else(
+      .pred_TRUE >= cutoff_prob,
+      "labelled hazardous",
+      "labelled not hazardous"
+    )
+  ) %>%
+  count(labelled_hazardous, is_potentially_hazardous_asteroid) %>%
+  pivot_wider(names_from = is_potentially_hazardous_asteroid, values_from = n
+  ) 
+```
+
 
 
 Lucio Di Meo
