@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load-lib, message = FALSE}
 library(tidyverse)
-library(ggplot2)
+library(tidymodels)
 # Add any other libraries here
 
 ```
@@ -39,9 +39,7 @@ https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-fu
 ```{r load-data}
 # load your data 
 nearest_earth_objects <- read_csv("data/nearest-earth-objects(1910-2024).csv")
-view(nearest_earth_objects)
 neo_dur_df <- read_csv("data/neo_dur_df.csv")
-View(neo_dur_df)
 variable_reference <-  tribble(
   ~variable, ~category, ~description,
   # Identification and observation information
@@ -105,7 +103,11 @@ near_earth_object_for_earth <- neo_dur_df |>
   select(-orbiting_body1, -orbiting_body2, -orbiting_body3,
          -relative_velocity1,-relative_velocity2,-relative_velocity3,
          -miss_distance_kilometers1, -miss_distance_kilometers2, -miss_distance_kilometers3) |> 
-  filter(orbiting_body0 == "Earth")
+  filter(orbiting_body0 == "Earth") |> 
+  mutate(as.factor(is_potentially_hazardous_asteroid)) |> 
+  rename(is_hazardous = is_potentially_hazardous_asteroid)
+
+
 near_earth_object_for_earth
 ```
 
@@ -199,9 +201,8 @@ ggplot(
 ```
 ```{r}
 #Displaying a density graph of miss distances for NEOs
-
-ggplot(
-  data = individual_observations,
+individual_observations %>%
+  ggplot(
   mapping = aes(
     x = miss_distance_kilometers,
     colour = is_potentially_hazardous_asteroid
@@ -215,11 +216,277 @@ ggplot(
   )
   
 ```
+```{r}
+individual_observations %>%
+  filter(
+    orbiting_body == "Earth"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Earth",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Moon"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Moon",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Juptr"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Jupiter",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Venus"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Venus",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Mars"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Mars",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Merc"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Mercury",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+individual_observations %>%
+  filter(
+    orbiting_body == "Satrn"
+  ) %>%
+  ggplot(
+  mapping = aes(
+    x = relative_velocity,
+    colour = is_potentially_hazardous_asteroid)
+  ) +
+  geom_density() +
+  labs(
+    title = "Saturn",
+    x = "Relative Velocity",
+    y = "Density",
+    colour = "Potentially Hazardous"
+  )
+```
+
+```{r}
+#Creating models to determine predictive power of variables
+neo_dur_df <- neo_dur_df %>%
+  mutate(is_potentially_hazardous_asteroid =
+           as.factor(is_potentially_hazardous_asteroid))
+
+set.seed(6767)
+neo_split <- initial_split(neo_dur_df)
+neo_train <- training(neo_split)
+neo_test <- testing(neo_split)
+
+
+neo_rec_1 <- recipe(
+  is_potentially_hazardous_asteroid ~ relative_velocity0,
+  data = neo_dur_df
+)
+neo_mod_1 <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_1 <- workflow() %>%
+  add_recipe(neo_rec_1) %>%
+  add_model(neo_mod_1)
+
+neo_fit_1 <- fit(neo_wflow_1, data = neo_train)
+neo_predictions_1 <- augment(neo_fit_1, new_data = neo_test)
+
+neo_roc_1 <- roc_curve(
+  neo_predictions_1,
+  truth = is_potentially_hazardous_asteroid,
+  .pred_TRUE,
+  event_level = "second")
+
+autoplot(neo_roc_1) +
+  labs(
+    title = "Relative Velocity 0"
+  )
+
+neo_predictions_1 %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  )
+
+
+```
+```{r}
+#Logistic Model for Miss Distance 0 and Potential Hazard
+neo_rec_2 <- recipe(
+  is_potentially_hazardous_asteroid ~ miss_distance_kilometers0,
+  data = neo_dur_df
+)
+neo_mod_2 <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_2 <- workflow() %>%
+  add_recipe(neo_rec_2) %>%
+  add_model(neo_mod_2)
+
+neo_fit_2 <- fit(neo_wflow_2, data = neo_train)
+neo_predictions_2 <- augment(neo_fit_2, new_data = neo_test)
+
+neo_roc_2 <- roc_curve(
+  neo_predictions_2,
+  truth = is_potentially_hazardous_asteroid,
+  .pred_TRUE,
+  event_level = "first")
+
+autoplot(neo_roc_2) +
+  labs(
+    title = "Miss Distance 0 (Km)"
+  )
+
+neo_predictions_2 %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "first"
+  )
+```
+```{r}
+#Logistic model for estimated diameter and potential hazard
+neo_rec_3 <- recipe(
+  is_potentially_hazardous_asteroid ~ estimated_diameter_kilometers_max,
+  data = neo_dur_df
+)
+neo_mod_3 <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_3 <- workflow() %>%
+  add_recipe(neo_rec_3) %>%
+  add_model(neo_mod_3)
+
+neo_fit_3 <- fit(neo_wflow_3, data = neo_train)
+neo_predictions_3 <- augment(neo_fit_3, new_data = neo_test)
+
+neo_roc_3 <- roc_curve(
+  neo_predictions_3,
+  truth = is_potentially_hazardous_asteroid,
+  .pred_TRUE,
+  event_level = "second")
+
+autoplot(neo_roc_3) +
+  labs(
+    title = "Maximum Estimated Diameter (Km)"
+  )
+
+neo_predictions_3 %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  )
+```
+```{r}
+neo_rec_4 <- recipe(
+  is_potentially_hazardous_asteroid ~ estimated_diameter_kilometers_max + relative_velocity0 + miss_distance_kilometers0,
+  data = neo_dur_df
+)
+neo_mod_4 <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_4 <- workflow() %>%
+  add_recipe(neo_rec_4) %>%
+  add_model(neo_mod_4)
+
+neo_fit_4 <- fit(neo_wflow_4, data = neo_train)
+neo_predictions_4 <- augment(neo_fit_4, new_data = neo_test)
+
+neo_roc_4 <- roc_curve(
+  neo_predictions_4,
+  truth = is_potentially_hazardous_asteroid,
+  .pred_TRUE,
+  event_level = "second")
+
+autoplot(neo_roc_4) +
+  labs(
+    title = "Max Diameter, Relative Velocity 0, Miss Distance 0"
+  )
+
+neo_predictions_4 %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  )
+```
+
+
 
 
 
 Jonah's Workspace
 ```{r}
+### DATA VISUALISATIONS
+
 # Classifying NEOs based on how close they got to Earth and then comparing this to whether they were deemed hazardous. Less than ~7.5M km is considered a close miss.
 neo_dur_df %>%
   filter(orbiting_body0 == "Earth") %>%
@@ -237,10 +504,18 @@ neo_dur_df %>%
     y = "hazardous (true / false"
       )
 
+# There is no "threshold" for miss_distance above which neos are not classified as hazardous
+ggplot(individual_observations, aes(miss_distance_kilometers, fill = is_potentially_hazardous_asteroid)) +
+  geom_density(alpha = 0.4) +
+  facet_wrap(~ observation, scales = "fixed")
+  
+
+
 # Investigating the relationship between miss distance, relative velocity and hazard assessment.
 neo_dur_df %>%
   filter(orbiting_body0 == "Earth") %>%
   ggplot(aes(miss_distance_kilometers0, relative_velocity0, color = is_potentially_hazardous_asteroid)) +
+  geom_point(alpha = 0.05) +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
     subtitle = "Comparison of Miss Distance and Relative Velocity (first observation) of objects approaching Earth",
@@ -248,11 +523,81 @@ neo_dur_df %>%
     y = "first measured relative velocity (km)",
     color = "hazardous"
   )
+
+# investigating the distribution of relative_velocity0 and miss_distance_kilometers0 per orbiting_body0
+ggplot(neo_dur_df, aes(orbiting_body0, relative_velocity0, fill = is_potentially_hazardous_asteroid)) +
+  geom_boxplot()
+
+ggplot(neo_dur_df, aes(orbiting_body0, miss_distance_kilometers0, fill = is_potentially_hazardous_asteroid)) +
+  geom_boxplot()
 ```
+```{r}
+### MODELS
+# Include all observations by using the pivoted dataframe: individual_observations
+neo_earth_model1 <- individual_observations %>%
+  filter(orbiting_body == "Earth") %>%
+  mutate(
+    is_potentially_hazardous_asteroid = as.factor(is_potentially_hazardous_asteroid)
+  )
+
+set.seed(6767)
+neo_split_model1 <- initial_split(neo_earth_model1)
+neo_train_model1 <- training(neo_split_model1)
+neo_test_model1  <- testing(neo_split_model1)
+
+neo_rec_model1 <- recipe(is_potentially_hazardous_asteroid ~ miss_distance_kilometers + relative_velocity, data = neo_train_model1) %>%
+  step_dummy(all_nominal(), -all_outcomes())
+  
+neo_mod <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow <- workflow() %>%
+  add_model(neo_mod) %>%
+  add_recipe(neo_rec_model1)
+
+neo_fit <- neo_wflow %>%
+  fit(data = neo_train_model1)
+
+hazard_pred <- predict(neo_fit, neo_test_model1, type = "prob") %>%
+  bind_cols(neo_test_model1)
+
+hazard_pred %>%
+  roc_curve(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
+hazard_pred %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  )
+
+cutoff_prob <- 0.1
+
+hazard_pred %>%
+  mutate(
+    labelled_hazardous = if_else(
+      .pred_TRUE > cutoff_prob,
+      "labelled hazardous",
+      "labelled not hazardous"
+    )
+  ) %>%
+  count(labelled_hazardous, is_potentially_hazardous_asteroid) %>%
+  pivot_wider(names_from = is_potentially_hazardous_asteroid, values_from = n
+  )
+
+
+
+```
+
 
 Lucio Di Meo
 
-Asteroid eccentricity is a measure of the elipticallity of it's orbit around the sun. A high orbital eccentricity could mean as their path is more stretched they could more routinely cross paths with other planet's orbital paths more often.
+Asteroid eccentricity i^s a measure of the elipticallity of it's orbit around the sun. A high orbital eccentricity could mean as their path is more stretched they could more routinely cross paths with other planet's orbital paths more often.
 I would like to see if this increases the risk of it being potentially hazardous.
 
 orbit id vs id 
