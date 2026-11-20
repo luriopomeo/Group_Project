@@ -36,6 +36,8 @@ Monitoring Near-Earth Objects (NEOs) is critical for planetary defense and asses
 
 ## Data
 
+We chose to use the NASA, Near-Earth Object (NEO) Dataset. 
+
 Briefly describe your dataset here - include a description of the key variables you will be investigating. 
 Include a citation for your data. 
 See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on proper citation for datasets. 
@@ -70,6 +72,6 @@ Make sure to hide your code with  `echo = FALSE` unless the point you are trying
 
 ## References
 
-List any references here. You should, at a minimum, list your data source.
+Jayawardana, S. (n.d.). *NASA Near-Earth Objects (NEO) Full Dataset* [Data set]. Kaggle. Retrieved [Insert Retrieval Date, e.g., 18 October 2026], from https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-full-dataset
 
 
