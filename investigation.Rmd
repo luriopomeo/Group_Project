@@ -652,43 +652,8 @@ Deviance Reduction: The residual deviance dropped from 12,729.7 (Null deviance) 
 Kate's workspace
 
 ```{r}
-library(tidyverse)
-asteroids_analysis <- neo_dur_df %>%
-  rowwise() %>%
+body_data <- neo_dur_df %>%
   mutate(
-    changed_planet = n_distinct(c(
-      orbiting_body0,
-      orbiting_body1,
-      orbiting_body2,
-      orbiting_body3
-    )) > 1
-  ) %>%
-  ungroup()
-
-ggplot(asteroids_analysis,
-       aes(x = changed_planet, fill = is_potentially_hazardous_asteroid)) +
-  geom_bar(position = "fill") +
-  labs(
-    title = "Hazardous Asteroids and Changes in Orbital Planet",
-    x = "Did the asteroid change its orbital planet?",
-    y = "Proportion of asteroids",
-    fill = "Hazardous"
-  ) +
-  scale_y_continuous(labels = scales::percent) +
-  theme_minimal()
-
-```
-
-```{r}
-library(tidyverse)
-library(broom)
-asteroids_model <- neo_dur_df %>%
-  mutate(
-    diameter = (
-      estimated_diameter_kilometers_min +
-      estimated_diameter_kilometers_max
-    ) / 2,
-
     changed_body = pmap_lgl(
       select(
         .,
@@ -704,12 +669,42 @@ asteroids_model <- neo_dur_df %>%
       }
     )
   ) %>%
+  filter(orbiting_body0 == "Earth") %>%
+  select(id, changed_body)
+
+```
+
+```{r}
+set.seed(6767)
+neo_split <- initial_split(near_earth_object_for_earth)
+neofe_train <- training(neo_split)
+neofe_test <- testing(neo_split)
+
+neofe_train <- neofe_train %>%
+  left_join(body_data, by = "id")
+
+neofe_test <- neofe_test %>%
+  left_join(body_data, by = "id")
+```
+
+
+```{r}
+library(tidyverse)
+library(broom)
+asteroids_model <- neofe_train %>%
+  mutate(
+    diameter = (
+      estimated_diameter_kilometers_min +
+      estimated_diameter_kilometers_max
+    ) / 2,
+  ) %>%
   select(
     id,
-    is_potentially_hazardous_asteroid,
+    is_hazardous,
     diameter,
     eccentricity,
     inclination,
+    changed_body,
     semi_major_axis,
     jupiter_tisserand_invariant,
     changed_body
@@ -724,35 +719,22 @@ table(asteroids_model$changed_body)
 
 #The initial modelling dataset was expanded by adding further orbital and observational characteristics from the original dataset. These variables were selected to investigate a broader range of potential predictors of asteroid hazard classification, including orbital properties and the quality and extent of observational data.
 
-asteroids_model <- neo_dur_df %>%
+asteroids_model <- neofe_train %>%
   mutate(
     diameter = (
       estimated_diameter_kilometers_min +
       estimated_diameter_kilometers_max
     ) / 2,
-
-    changed_body = pmap_lgl(
-      select(
-        .,
-        orbiting_body0,
-        orbiting_body1,
-        orbiting_body2,
-        orbiting_body3
-      ),
-      function(...) {
-        bodies <- c(...)
-        bodies <- bodies[!is.na(bodies) & bodies != ""]
-        n_distinct(bodies) > 1
-      }
-    )
   ) %>%
   select(
     id,
-    is_potentially_hazardous_asteroid,
+    is_hazardous,
     diameter,
     eccentricity,
     inclination,
     semi_major_axis,
+    miss_distance_kilometers0,
+    relative_velocity0,
     jupiter_tisserand_invariant,
     changed_body,
     orbital_period,
@@ -777,33 +759,20 @@ asteroids_model <- neo_dur_df %>%
 # The initial model included 16 candidate predictors, covering physical characteristics, orbital parameters and observational information. This provided a broad starting point for examining which variables were associated with the hazard classification.
 
 full_model <- glm(
-  is_potentially_hazardous_asteroid ~
-    diameter +
-    eccentricity +
-    inclination +
-    semi_major_axis +
-    jupiter_tisserand_invariant +
-    changed_body +
-    orbital_period +
-    perihelion_distance +
-    aphelion_distance +
-    mean_motion +
-    ascending_node_longitude +
-    perihelion_argument +
-    mean_anomaly +
-    orbit_uncertainty +
-    data_arc_in_days +
-    observations_used,
+  is_hazardous ~ . -is_hazardous -id,
   data = asteroids_model,
   family = binomial
 )
 
 summary(full_model)
+```
 
+
+```{r}
 correlations <- asteroids_model %>%
   select(
     -id,
-    -is_potentially_hazardous_asteroid,
+    -is_hazardous,
     -changed_body
   ) %>%
   cor(use = "pairwise.complete.obs")
@@ -832,7 +801,7 @@ correlations %>%
 # Pairs with an absolute correlation coefficient greater than 0.8 were identified as potentially highly correlated. Several strong relationships were found, particularly between orbital period and semi-major axis (r = 0.995), and between the Jupiter Tisserand invariant and mean motion (r = 0.991). These results suggested that some predictors contained overlapping information, which could make individual regression coefficients difficult to interpret.
 
 reduced_model <- glm(
-  is_potentially_hazardous_asteroid ~
+  is_hazardous ~
     diameter +
     eccentricity +
     inclination +
