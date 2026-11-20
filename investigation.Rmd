@@ -486,6 +486,15 @@ neo_predictions_4 %>%
 Jonah's Workspace
 ```{r}
 ### DATA VISUALISATIONS
+neo_dur_df %>%
+  mutate(
+    is_large_enough = if_else(estimated_diameter_kilometers_min > 0.14, TRUE, FALSE)
+  ) %>%
+  ggplot() +
+  geom_density(aes(minimum_orbit_intersection, fill = hazardous), alpha = 0.4) +
+  geom_vline(xintercept = 0.05) +
+  facet_wrap(~is_large_enough)
+
 
 # Classifying NEOs based on how close they got to Earth and then comparing this to whether they were deemed hazardous. Less than ~7.5M km is considered a close miss.
 neo_dur_df %>%
