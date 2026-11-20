@@ -355,20 +355,20 @@ neo_wflow_1 <- workflow() %>%
   add_model(neo_mod_1)
 
 neo_fit_1 <- fit(neo_wflow_1, data = neo_train)
-neo_predictions <- augment(neo_fit_1, new_data = neo_test)
+neo_predictions_1 <- augment(neo_fit_1, new_data = neo_test)
 
-neo_roc <- roc_curve(
-  neo_predictions,
+neo_roc_1 <- roc_curve(
+  neo_predictions_1,
   truth = is_potentially_hazardous_asteroid,
   .pred_TRUE,
   event_level = "second")
 
-autoplot(neo_roc) +
+autoplot(neo_roc_1) +
   labs(
     title = "Relative Velocity 0"
   )
 
-neo_predictions %>%
+neo_predictions_1 %>%
   roc_auc(
     truth = is_potentially_hazardous_asteroid,
     .pred_TRUE,
@@ -376,6 +376,107 @@ neo_predictions %>%
   )
 
 
+```
+```{r}
+#Logistic Model for Miss Distance 0 and Potential Hazard
+neo_rec_2 <- recipe(
+  is_potentially_hazardous_asteroid ~ miss_distance_kilometers0,
+  data = neo_dur_df
+)
+neo_mod_2 <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_2 <- workflow() %>%
+  add_recipe(neo_rec_2) %>%
+  add_model(neo_mod_2)
+
+neo_fit_2 <- fit(neo_wflow_2, data = neo_train)
+neo_predictions_2 <- augment(neo_fit_2, new_data = neo_test)
+
+neo_roc_2 <- roc_curve(
+  neo_predictions_2,
+  truth = is_potentially_hazardous_asteroid,
+  .pred_TRUE,
+  event_level = "first")
+
+autoplot(neo_roc_2) +
+  labs(
+    title = "Miss Distance 0 (Km)"
+  )
+
+neo_predictions_2 %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "first"
+  )
+```
+```{r}
+#Logistic model for estimated diameter and potential hazard
+neo_rec_3 <- recipe(
+  is_potentially_hazardous_asteroid ~ estimated_diameter_kilometers_max,
+  data = neo_dur_df
+)
+neo_mod_3 <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_3 <- workflow() %>%
+  add_recipe(neo_rec_3) %>%
+  add_model(neo_mod_3)
+
+neo_fit_3 <- fit(neo_wflow_3, data = neo_train)
+neo_predictions_3 <- augment(neo_fit_3, new_data = neo_test)
+
+neo_roc_3 <- roc_curve(
+  neo_predictions_3,
+  truth = is_potentially_hazardous_asteroid,
+  .pred_TRUE,
+  event_level = "second")
+
+autoplot(neo_roc_3) +
+  labs(
+    title = "Maximum Estimated Diameter (Km)"
+  )
+
+neo_predictions_3 %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  )
+```
+```{r}
+neo_rec_4 <- recipe(
+  is_potentially_hazardous_asteroid ~ estimated_diameter_kilometers_max + relative_velocity0 + miss_distance_kilometers0,
+  data = neo_dur_df
+)
+neo_mod_4 <- logistic_reg() %>%
+  set_engine("glm")
+
+neo_wflow_4 <- workflow() %>%
+  add_recipe(neo_rec_4) %>%
+  add_model(neo_mod_4)
+
+neo_fit_4 <- fit(neo_wflow_4, data = neo_train)
+neo_predictions_4 <- augment(neo_fit_4, new_data = neo_test)
+
+neo_roc_4 <- roc_curve(
+  neo_predictions_4,
+  truth = is_potentially_hazardous_asteroid,
+  .pred_TRUE,
+  event_level = "second")
+
+autoplot(neo_roc_4) +
+  labs(
+    title = "Max Diameter, Relative Velocity 0, Miss Distance 0"
+  )
+
+neo_predictions_4 %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    .pred_TRUE,
+    event_level = "second"
+  )
 ```
 
 
