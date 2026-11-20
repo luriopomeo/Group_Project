@@ -32,11 +32,7 @@ library(ggplot2)
 
 ## Research Question
 
-Describe your research question here. Include why this question might be of interest. 
-
-
-
-
+Monitoring Near-Earth Objects (NEOs) is critical for planetary defense and assessing potential impact risks to Earth. Our project is investigating what orbital and physical characteristics of an asteroid defined as an NEO could make it potentially hazardous. NASA already has a strict, predefined definition for what makes an asteroid potentially hazardous to Earth - an NEO must satisfy both the criteria: having a diameter larger than 140 meters, and the minimum orbit intersection distance (MOID) with Earth be less than 0.05 AU We want to produce two models; one that aims to replicate NASA's definitions, including the variables MOID and diameter and another which doesn't include variables included in NASA's defintions, so they don't mathematically dominate the model, letting us investigate which underlying orbital and kinematic features actually drive hazard risk.
 
 ## Data
 
