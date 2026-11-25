@@ -43,10 +43,7 @@ Include a citation for your data.
 See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on proper citation for datasets. 
 If you got your data off the web, make sure to state the retrieval date.
 
-
-
-
-
+MOID, relative velocity, miss distance, diameter, absolute magnitude, id - plus some other variables and just explain what they are 
 
 ## Findings
 
@@ -66,8 +63,13 @@ The addin will ignore code chunks and only count the words in prose. If you don'
 You can also load your data here and present any analysis results / plots.
 Make sure to hide your code with  `echo = FALSE` unless the point you are trying to make is about the code itself, in which case you should show your code.
 
+Brook/Alfie/Lucio/Jonah - write about EDA on what variables could be the most significant absed on our own work, ie eccentricity, orbit type, relative velocity, miss distance. visulisations and theory. make sure to reference theory.
 
+Jonah - benchmark, for how good a logistic regression model can be if just including teh criteria for potentially hazardous 0.98 auroc.
 
+KATE - write about how depending on what starting variables in large model which we reduce - including criteria for potentially hazardous, the backward elimination process removes more variables and finds more redundancy, auroc of 0.992, higher than jonahs benchmark of 0.987 logistic model that had only variables moid and magnitude (the criteria) - not including criteria for potentially hazardous, the backward elimination process romeves less variables still has variable.
+
+Conclusion - which of the variables we were invesetigating in our EDA were included in kates final non-criteria including. Mention how kates model higher than jonahs when including the criteria. Could show that the extra variables do add extra validility/accuracy.
 
 
 ## References
