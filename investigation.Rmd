@@ -169,8 +169,11 @@ ggplot(orbit_summary,
   theme_minimal() +
   theme(legend.position = "none")
 ```
+
+
+
+Orbital Geometry Logistic Regression Model
 ```{r}
-#Orbital Geometry logistics model 
 #set up training and testing data 
 set.seed(6767)
 neo_testtraining <- initial_split(
@@ -188,9 +191,125 @@ prop.table(table(neo_train$is_potentially_hazardous_asteroid))
 prop.table(table(neo_test$is_potentially_hazardous_asteroid))
 ```
 
+```{r}
+#Correlation between numerical orbit indicators
+
+neo_train %>%
+  select(
+    eccentricity,
+    inclination,
+    semi_major_axis) %>%
+  cor()
+```
+Eccentricity and semi-major axis show a relatively strong positively strong correlation, r = 0.663, this makes it difficult to understand their individual effects on classification of being a hazardous asteroid. Inclination shows negligible linear correlation with both eccentricity and the semi major axis (r=0.044, r=0.002). I will retain all three predictors as they describe distinct physical characteristics of the asteroids orbits.
+
+```{r}
+#Visualise eccentricity and semi-major axis
+
+ggplot(
+  data = neo_train,
+  aes(
+    x= semi_major_axis,
+    y = eccentricity,
+    colour = is_potentially_hazardous_asteroid
+  )
+) +
+  geom_point(alpha = 0.3) +
+  labs(
+    title = "Orbital Size and Eccentricity Relationship",
+    x = "semi-major axis",
+    y = "Eccentricity",
+    colour = "Potentially Hazardous"
+  )+
+  theme_minimal()
+```
+The scatterplot supports the positive correlation between semi-major axis and eccentricity, although the relationship appears non-linear. There is substantial overlap between potentially hazardous and non-hazardous asteroids, suggesting that neither variable alone provides a clear distinction between the two classifications. This makes me want to construct a multiple logistic regression model incorporating additional orbital characteristics.
+
+```{r}
+# Eccentricity distribution by hazard classification
+
+ggplot(
+  data = neo_train,
+  aes(
+    x = as.factor(is_potentially_hazardous_asteroid),
+    y = eccentricity,
+    fill = as.factor(is_potentially_hazardous_asteroid)
+  )
+) +
+  geom_boxplot() +
+  scale_fill_manual(
+    values = c("FALSE" = "grey60", "TRUE" = "red3")) +
+  labs(
+    title = "Eccentricity by hazard classification",
+    x = "Potentially hazardous",
+    y = "Eccentricity"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+Potentially hazardous asteroids tend to have higher eccentricity with a median of approximately 0.55 compared to the non hazardous with 0.40. This suggests a positive association between eccentricity and hazard classification. However the overlapping interquartile ranges suggests that eccentricity alone is unlikely to allow us to reliably determine classification, suggesting we should include eccentricity alongside other orbital predictors in a multiple logistic regression model.  
 
 
+```{r}
+# Eccentricity
 
+ggplot(neo_train, aes(
+  x = as.factor(is_potentially_hazardous_asteroid),
+  y = eccentricity,
+  fill = as.factor(is_potentially_hazardous_asteroid)
+)) +
+  geom_boxplot() +
+  scale_fill_manual(
+    values = c("FALSE" = "grey60", "TRUE" = "red3")
+  ) +
+  labs(
+    title = "Eccentricity by hazard classification",
+    x = "Potentially hazardous",
+    y = "Eccentricity"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+# Inclination
+
+ggplot(neo_train, aes(
+  x = as.factor(is_potentially_hazardous_asteroid),
+  y = inclination,
+  fill = as.factor(is_potentially_hazardous_asteroid)
+)) +
+  geom_boxplot() +
+  scale_fill_manual(
+    values = c("FALSE" = "grey60", "TRUE" = "red3")
+  ) +
+  labs(
+    title = "Inclination by hazard classification",
+    x = "Potentially hazardous",
+    y = "Inclination (degrees)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+# Semi-major axis
+
+ggplot(neo_train, aes(
+  x = as.factor(is_potentially_hazardous_asteroid),
+  y = semi_major_axis,
+  fill = as.factor(is_potentially_hazardous_asteroid)
+)) +
+  geom_boxplot() +
+  scale_fill_manual(
+    values = c("FALSE" = "grey60", "TRUE" = "red3")
+  ) +
+  labs(
+    title = "Semi-major axis by hazard classification",
+    x = "Potentially hazardous",
+    y = "Semi-major axis (AU)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
 
 
 
