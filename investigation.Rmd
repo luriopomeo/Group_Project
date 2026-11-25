@@ -730,10 +730,14 @@ table(asteroids_model$changed_body)
 
 asteroids_model <- neofe_train %>%
   mutate(
+    is_hazardous = factor(
+      is_hazardous,
+      levels = c(FALSE, TRUE)
+    ),
     diameter = (
       estimated_diameter_kilometers_min +
       estimated_diameter_kilometers_max
-    ) / 2,
+    ) / 2
   ) %>%
   select(
     id,
@@ -774,6 +778,103 @@ full_model <- glm(
 )
 
 summary(full_model)
+```
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+vars <- setdiff(
+  names(asteroids_model),
+  c("id", "is_hazardous")
+)
+set.seed(123)
+
+folds <- vfold_cv(
+  asteroids_model,
+  v = 5,
+  strata = is_hazardous
+)
+
+cv_auc <- function(dropped) {
+
+  predictors <- setdiff(vars, dropped)
+
+  asteroid_workflow <- workflow() %>%
+    add_model(
+      logistic_reg() %>%
+        set_engine("glm")
+    ) %>%
+    add_formula(
+      reformulate(predictors, response = "is_hazardous")
+    )
+
+  results <- fit_resamples(
+    asteroid_workflow,
+    resamples = folds,
+    metrics = metric_set(roc_auc)
+  )
+
+  collect_metrics(results) %>%
+    filter(.metric == "roc_auc") %>%
+    pull(mean)
+}
+dropped <- character(0)
+
+best <- cv_auc(dropped)
+
+history <- tibble()
+
+repeat {
+
+  remaining <- setdiff(vars, dropped)
+
+  if (length(remaining) == 1) break
+
+  scores <- map_dbl(
+    remaining,
+    ~ cv_auc(c(dropped, .x))
+  )
+
+  history <- bind_rows(
+    history,
+    tibble(
+      round = length(dropped) + 1,
+      drop = remaining,
+      cv_auc = scores
+    )
+  )
+
+  if (max(scores) <= best) break
+
+  dropped <- c(
+    dropped,
+    remaining[which.max(scores)]
+  )
+
+  best <- max(scores)
+}
+
+dropped
+selected_vars <- setdiff(vars, dropped)
+selected_vars
+
+
+```
+
+
+```{r}
+predictions <- predict(
+  full_model,
+  type = "response"
+)
+asteroids_model %>%
+  roc_curve(
+    truth = is_hazardous,
+    .hazardos,
+    event_level = "second"
+  ) %>%
+  autoplot()
+
 ```
 
 
