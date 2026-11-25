@@ -26,7 +26,7 @@ Question: What physical and orbital characteristics (such as absolute magnitude,
 
 Variables that might be related:
 - Miss distance
-- Size (diameter)
+- Size (diameter) 
 - Velocity
 
 https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-full-dataset
@@ -169,6 +169,31 @@ ggplot(orbit_summary,
   theme_minimal() +
   theme(legend.position = "none")
 ```
+```{r}
+#Orbital Geometry logistics model 
+#set up training and testing data 
+set.seed(6767)
+neo_testtraining <- initial_split(
+  neo_dur_df,
+  prop = 0.8,
+  strata = is_potentially_hazardous_asteroid
+)
+neo_train <- training(neo_testtraining)
+neo_test <- testing(neo_testtraining)
+
+dim(neo_train)
+dim(neo_test)
+prop.table(table(neo_train$is_potentially_hazardous_asteroid))
+
+prop.table(table(neo_test$is_potentially_hazardous_asteroid))
+```
+
+
+
+
+
+
+
 
 Alfie's Workspace
 ```{r}
