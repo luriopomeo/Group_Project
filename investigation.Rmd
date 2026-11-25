@@ -491,7 +491,7 @@ neo_dur_df %>%
     is_large_enough = if_else(estimated_diameter_kilometers_min > 0.14, TRUE, FALSE)
   ) %>%
   ggplot() +
-  geom_density(aes(minimum_orbit_intersection, fill = hazardous), alpha = 0.4) +
+  geom_density(aes(minimum_orbit_intersection, fill = is_potentially_hazardous_asteroid), alpha = 0.4) +
   geom_vline(xintercept = 0.05) +
   facet_wrap(~is_large_enough)
 
@@ -539,6 +539,24 @@ ggplot(neo_dur_df, aes(orbiting_body0, relative_velocity0, fill = is_potentially
 
 ggplot(neo_dur_df, aes(orbiting_body0, miss_distance_kilometers0, fill = is_potentially_hazardous_asteroid)) +
   geom_boxplot()
+
+
+minimum_orbit_intersection_threshold <- 0.05
+absolute_magnitude_threshold <- 22
+# taken from https://cneos.jpl.nasa.gov/about/neo_groups.html
+ggplot(neo_dur_df, aes(minimum_orbit_intersection, absolute_magnitude_h, colour = is_potentially_hazardous_asteroid)) +
+  geom_point(alpha = 0.2) +
+  facet_wrap(~is_potentially_hazardous_asteroid) +
+  geom_vline(xintercept = minimum_orbit_intersection_threshold, linetype = "dashed") +
+  geom_hline(yintercept = absolute_magnitude_threshold, linetype = "dashed") +
+  labs(
+    x = "minimum orbit intersection (au)",
+    y = "absolute magnitude (H)",
+    title = "Visualising Nasa's hazard classification system",
+    subtitle = "The dashed lines represent Nasa's official thresholds (0.05, 22)",
+    color = "is hazardous"
+  ) + 
+  theme_bw()
 ```
 ```{r}
 ### MODELS
