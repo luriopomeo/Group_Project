@@ -407,6 +407,172 @@ orbital_predictions %>%
 ```
 At a classification threshold of 0.5, the orbital geometry model achieved an overall accuracy of 90.63%. However, only 3 of the 481 potentially hazardous asteroids were correctly detected, resulting in a sensitivity of 0.62%. The high accuracy is misleading due to the imbalance between hazardous and non-hazardous observations. Given the importance of correctly identifying potentially hazardous asteroids, alternative classification thresholds should be investigated to improve sensitivity.
 
+```{r}
+#threshold of 0.1
+orbital_predictions <- orbital_predictions %>%
+  mutate(
+    predicted_class_01 = factor(
+      predicted_probability >= 0.1,
+      levels = c(FALSE, TRUE)
+    )
+  )
+
+orbital_predictions %>%
+  conf_mat(
+    truth = is_potentially_hazardous_asteroid,
+    estimate = predicted_class_01
+  )
+```
+Reducing the threshold from 0.5 to 0.1 increased sensitivity from 0.62% to 75.26%, reducing the number of false negatives from 478 to 119. However, overall accuracy decreased from 90.63% to 68.98%, and the number of false positives increased from 7 to 1,486. This clearly shows the trade-off between sensitivity and specificity. In the context of asteroid monitoring, a lower threshold may be preferable because failing to classify a potentially hazardous asteroid could be more dangerous than incorrectly identifying a non-hazardous asteroid.
+
+```{r}
+#threshold of 0.15
+
+orbital_predictions <- orbital_predictions %>%
+  mutate(
+    predicted_class_015 = factor(
+      predicted_probability >= 0.15,
+      levels = c(FALSE, TRUE)
+    )
+  )
+
+orbital_predictions %>%
+  conf_mat(
+    truth = is_potentially_hazardous_asteroid,
+    estimate = predicted_class_015
+  )
+```
+Three classification thresholds (0.50, 0.15 and 0.10) were investigated to assess the value between sensitivity and specificity. Reducing the threshold from 0.50 to 0.10 increased sensitivity from 0.62% to 75.26%, while accuracy decreased from 99.85% to 68.34%. An intermediate threshold of 0.15 achieved a sensitivity of 54.68% and specificity of 80.91%. Given the potential consequences of failing to identify hazardous asteroids, a lower classification threshold is preferable, despite the increased number of false positives. These results also demonstrate why overall accuracy alone is an unsuitable measure of model performance for this imbalanced dataset.
+
+```{r}
+threshold_summary <- orbital_predictions %>%
+  select(
+    is_potentially_hazardous_asteroid,
+    predicted_class,
+    predicted_class_015,
+    predicted_class_01
+  ) %>%
+  pivot_longer(
+    cols = -is_potentially_hazardous_asteroid,
+    names_to = "threshold",
+    values_to = "prediction"
+  ) %>%
+  group_by(threshold) %>%
+  summarise(
+    accuracy = accuracy_vec(
+      is_potentially_hazardous_asteroid, prediction
+    ),
+    sensitivity = sens_vec(
+      is_potentially_hazardous_asteroid, prediction,
+      event_level = "second"
+    ),
+    specificity = spec_vec(
+      is_potentially_hazardous_asteroid, prediction,
+      event_level = "second"
+    )
+  )
+
+threshold_summary
+
+
+threshold_summary %>%
+  mutate(
+    threshold = recode(
+      threshold,
+      "predicted_class" = "0.50",
+      "predicted_class_015" = "0.15",
+      "predicted_class_01" = "0.10"
+    )
+  ) %>%
+  pivot_longer(
+    cols = c(accuracy, sensitivity, specificity),
+    names_to = "metric",
+    values_to = "performance"
+  ) %>%
+  ggplot(aes(
+    x = threshold,
+    y = performance * 100,
+    fill = metric
+  )) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Model performance across different thresholds",
+    x = "Threshold",
+    y = "Performance (%)",
+    fill = "Metric"
+  ) +
+  theme_minimal()
+```
+The graph demonstrates that increasing the threshold improves overall accuracy and specificity but substantially reduces sensitivity. A threshold of 0.1 provides a more balanced classification performance, achieving a sensitivity of 75.26% and specificity of 68.34%. Although a threshold of 0.5 achieves the highest accuracy of the three thresholds investigated, it fails to identify almost all potentially hazardous asteroids. This highlights the limitations of using accuracy alone when evaluating models fitted to imbalanced datasets.
+
+```{r}
+# Correlation analysis for expanded orbital model
+
+neo_train %>%
+  select(
+    eccentricity,
+    inclination,
+    semi_major_axis,
+    perihelion_distance,
+    aphelion_distance,
+    orbital_period,
+    mean_motion,
+    ascending_node_longitude,
+    perihelion_argument,
+    jupiter_tisserand_invariant
+  ) %>%
+  cor() %>%
+  round(3)
+```
+The correlation matrix reveals strong relationships between some orbital characteristics. Semi-major axis seems to show particularly strong correlations with orbital period (r = 0.995), aphelion distance (r = 0.980) and the Jupiter Tisserand invariant (r = −0.926). Including all these variables could make it difficult to clearly visulise their individual contributions to hazard classification. Therefore, highly correlated and redundent predictors will be excluded from the initial expanded model. Perihelion distance is selected for further investigation due to its physical relevance to the asteroid's proximity to the Sun.
+
+```{r}
+# Create validation data for model refinement
+
+set.seed(6767)
+
+orbital_validation_split <- initial_split(
+  neo_train,
+  prop = 0.8,
+  strata = is_potentially_hazardous_asteroid
+)
+
+orbital_development <- training(orbital_validation_split)
+
+orbital_validation <- testing(orbital_validation_split)
+
+dim(orbital_development)
+dim(orbital_validation)
+```
+```{r}
+#Orignal 
+orbital_v1 <- glm(
+  is_potentially_hazardous_asteroid ~
+    orbit_class_type +
+    eccentricity +
+    inclination +
+    semi_major_axis,
+  data = orbital_development,
+  family = binomial
+)
+
+summary(orbital_v1)
+
+#V2
+
+orbital_v2 <- glm(
+  is_potentially_hazardous_asteroid ~
+    orbit_class_type +
+    eccentricity +
+    inclination +
+    semi_major_axis +
+    perihelion_distance,
+  data = orbital_development,
+  family = binomial
+)
+
+summary(orbital_v2)
+```
 
 
 Alfie's Workspace

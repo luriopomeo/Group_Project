@@ -877,6 +877,297 @@ imbalance between hazardous and non-hazardous observations. Given the
 importance of correctly identifying potentially hazardous asteroids,
 alternative classification thresholds should be investigated to improve
 sensitivity.</p>
+<pre class="r"><code>#threshold of 0.1
+orbital_predictions &lt;- orbital_predictions %&gt;%
+  mutate(
+    predicted_class_01 = factor(
+      predicted_probability &gt;= 0.1,
+      levels = c(FALSE, TRUE)
+    )
+  )
+
+orbital_predictions %&gt;%
+  conf_mat(
+    truth = is_potentially_hazardous_asteroid,
+    estimate = predicted_class_01
+  )</code></pre>
+<pre><code>##           Truth
+## Prediction FALSE TRUE
+##      FALSE  3207  119
+##      TRUE   1486  362</code></pre>
+<p>Reducing the threshold from 0.5 to 0.1 increased sensitivity from
+0.62% to 75.26%, reducing the number of false negatives from 478 to 119.
+However, overall accuracy decreased from 90.63% to 68.98%, and the
+number of false positives increased from 7 to 1,486. This clearly shows
+the trade-off between sensitivity and specificity. In the context of
+asteroid monitoring, a lower threshold may be preferable because failing
+to classify a potentially hazardous asteroid could be more dangerous
+than incorrectly identifying a non-hazardous asteroid.</p>
+<pre class="r"><code>#threshold of 0.15
+
+orbital_predictions &lt;- orbital_predictions %&gt;%
+  mutate(
+    predicted_class_015 = factor(
+      predicted_probability &gt;= 0.15,
+      levels = c(FALSE, TRUE)
+    )
+  )
+
+orbital_predictions %&gt;%
+  conf_mat(
+    truth = is_potentially_hazardous_asteroid,
+    estimate = predicted_class_015
+  )</code></pre>
+<pre><code>##           Truth
+## Prediction FALSE TRUE
+##      FALSE  3797  218
+##      TRUE    896  263</code></pre>
+<p>Three classification thresholds (0.50, 0.15 and 0.10) were
+investigated to assess the value between sensitivity and specificity.
+Reducing the threshold from 0.50 to 0.10 increased sensitivity from
+0.62% to 75.26%, while accuracy decreased from 99.85% to 68.34%. An
+intermediate threshold of 0.15 achieved a sensitivity of 54.68% and
+specificity of 80.91%. Given the potential consequences of failing to
+identify hazardous asteroids, a lower classification threshold is
+preferable, despite the increased number of false positives. These
+results also demonstrate why overall accuracy alone is an unsuitable
+measure of model performance for this imbalanced dataset.</p>
+<pre class="r"><code>threshold_summary &lt;- orbital_predictions %&gt;%
+  select(
+    is_potentially_hazardous_asteroid,
+    predicted_class,
+    predicted_class_015,
+    predicted_class_01
+  ) %&gt;%
+  pivot_longer(
+    cols = -is_potentially_hazardous_asteroid,
+    names_to = &quot;threshold&quot;,
+    values_to = &quot;prediction&quot;
+  ) %&gt;%
+  group_by(threshold) %&gt;%
+  summarise(
+    accuracy = accuracy_vec(
+      is_potentially_hazardous_asteroid, prediction
+    ),
+    sensitivity = sens_vec(
+      is_potentially_hazardous_asteroid, prediction,
+      event_level = &quot;second&quot;
+    ),
+    specificity = spec_vec(
+      is_potentially_hazardous_asteroid, prediction,
+      event_level = &quot;second&quot;
+    )
+  )
+
+threshold_summary</code></pre>
+<pre><code>## # A tibble: 3 × 4
+##   threshold           accuracy sensitivity specificity
+##   &lt;chr&gt;                  &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+## 1 predicted_class        0.906     0.00624       0.999
+## 2 predicted_class_01     0.690     0.753         0.683
+## 3 predicted_class_015    0.785     0.547         0.809</code></pre>
+<pre class="r"><code>threshold_summary %&gt;%
+  mutate(
+    threshold = recode(
+      threshold,
+      &quot;predicted_class&quot; = &quot;0.50&quot;,
+      &quot;predicted_class_015&quot; = &quot;0.15&quot;,
+      &quot;predicted_class_01&quot; = &quot;0.10&quot;
+    )
+  ) %&gt;%
+  pivot_longer(
+    cols = c(accuracy, sensitivity, specificity),
+    names_to = &quot;metric&quot;,
+    values_to = &quot;performance&quot;
+  ) %&gt;%
+  ggplot(aes(
+    x = threshold,
+    y = performance * 100,
+    fill = metric
+  )) +
+  geom_col(position = &quot;dodge&quot;) +
+  labs(
+    title = &quot;Model performance across different thresholds&quot;,
+    x = &quot;Threshold&quot;,
+    y = &quot;Performance (%)&quot;,
+    fill = &quot;Metric&quot;
+  ) +
+  theme_minimal()</code></pre>
+<p><img role="img" aria-label src="data:image/png;base64,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" alt width="672" />
+The graph demonstrates that increasing the threshold improves overall
+accuracy and specificity but substantially reduces sensitivity. A
+threshold of 0.1 provides a more balanced classification performance,
+achieving a sensitivity of 75.26% and specificity of 68.34%. Although a
+threshold of 0.5 achieves the highest accuracy of the three thresholds
+investigated, it fails to identify almost all potentially hazardous
+asteroids. This highlights the limitations of using accuracy alone when
+evaluating models fitted to imbalanced datasets.</p>
+<pre class="r"><code># Correlation analysis for expanded orbital model
+
+neo_train %&gt;%
+  select(
+    eccentricity,
+    inclination,
+    semi_major_axis,
+    perihelion_distance,
+    aphelion_distance,
+    orbital_period,
+    mean_motion,
+    ascending_node_longitude,
+    perihelion_argument,
+    jupiter_tisserand_invariant
+  ) %&gt;%
+  cor() %&gt;%
+  round(3)</code></pre>
+<pre><code>##                             eccentricity inclination semi_major_axis
+## eccentricity                       1.000       0.044           0.663
+## inclination                        0.044       1.000           0.002
+## semi_major_axis                    0.663       0.002           1.000
+## perihelion_distance               -0.341      -0.055           0.421
+## aphelion_distance                  0.785       0.014           0.980
+## orbital_period                     0.658       0.007           0.995
+## mean_motion                       -0.552       0.012          -0.894
+## ascending_node_longitude          -0.027      -0.004          -0.013
+## perihelion_argument               -0.020       0.020          -0.045
+## jupiter_tisserand_invariant       -0.635      -0.046          -0.926
+##                             perihelion_distance aphelion_distance
+## eccentricity                             -0.341             0.785
+## inclination                              -0.055             0.014
+## semi_major_axis                           0.421             0.980
+## perihelion_distance                       1.000             0.234
+## aphelion_distance                         0.234             1.000
+## orbital_period                            0.398             0.980
+## mean_motion                              -0.506            -0.848
+## ascending_node_longitude                  0.015            -0.018
+## perihelion_argument                      -0.037            -0.041
+## jupiter_tisserand_invariant              -0.430            -0.900
+##                             orbital_period mean_motion ascending_node_longitude
+## eccentricity                         0.658      -0.552                   -0.027
+## inclination                          0.007       0.012                   -0.004
+## semi_major_axis                      0.995      -0.894                   -0.013
+## perihelion_distance                  0.398      -0.506                    0.015
+## aphelion_distance                    0.980      -0.848                   -0.018
+## orbital_period                       1.000      -0.852                   -0.012
+## mean_motion                         -0.852       1.000                    0.013
+## ascending_node_longitude            -0.012       0.013                    1.000
+## perihelion_argument                 -0.043       0.050                   -0.013
+## jupiter_tisserand_invariant         -0.890       0.991                    0.015
+##                             perihelion_argument jupiter_tisserand_invariant
+## eccentricity                             -0.020                      -0.635
+## inclination                               0.020                      -0.046
+## semi_major_axis                          -0.045                      -0.926
+## perihelion_distance                      -0.037                      -0.430
+## aphelion_distance                        -0.041                      -0.900
+## orbital_period                           -0.043                      -0.890
+## mean_motion                               0.050                       0.991
+## ascending_node_longitude                 -0.013                       0.015
+## perihelion_argument                       1.000                       0.049
+## jupiter_tisserand_invariant               0.049                       1.000</code></pre>
+<p>The correlation matrix reveals strong relationships between some
+orbital characteristics. Semi-major axis seems to show particularly
+strong correlations with orbital period (r = 0.995), aphelion distance
+(r = 0.980) and the Jupiter Tisserand invariant (r = −0.926). Including
+all these variables could make it difficult to clearly visulise their
+individual contributions to hazard classification. Therefore, highly
+correlated and redundent predictors will be excluded from the initial
+expanded model. Perihelion distance is selected for further
+investigation due to its physical relevance to the asteroid’s proximity
+to the Sun.</p>
+<pre class="r"><code># Create validation data for model refinement
+
+set.seed(6767)
+
+orbital_validation_split &lt;- initial_split(
+  neo_train,
+  prop = 0.8,
+  strata = is_potentially_hazardous_asteroid
+)
+
+orbital_development &lt;- training(orbital_validation_split)
+
+orbital_validation &lt;- testing(orbital_validation_split)
+
+dim(orbital_development)</code></pre>
+<pre><code>## [1] 16556    44</code></pre>
+<pre class="r"><code>dim(orbital_validation)</code></pre>
+<pre><code>## [1] 4139   44</code></pre>
+<pre class="r"><code>#Orignal 
+orbital_v1 &lt;- glm(
+  is_potentially_hazardous_asteroid ~
+    orbit_class_type +
+    eccentricity +
+    inclination +
+    semi_major_axis,
+  data = orbital_development,
+  family = binomial
+)
+
+summary(orbital_v1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = is_potentially_hazardous_asteroid ~ orbit_class_type + 
+##     eccentricity + inclination + semi_major_axis, family = binomial, 
+##     data = orbital_development)
+## 
+## Coefficients:
+##                      Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)         -6.063442   0.162845 -37.234  &lt; 2e-16 ***
+## orbit_class_typeAPO  2.131984   0.113642  18.760  &lt; 2e-16 ***
+## orbit_class_typeATE  2.078227   0.159462  13.033  &lt; 2e-16 ***
+## orbit_class_typeIEO  2.924438   0.521935   5.603 2.11e-08 ***
+## eccentricity         2.596515   0.208467  12.455  &lt; 2e-16 ***
+## inclination          0.016148   0.002307   7.001 2.54e-12 ***
+## semi_major_axis      0.400485   0.072897   5.494 3.93e-08 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 10557.9  on 16555  degrees of freedom
+## Residual deviance:  9211.1  on 16549  degrees of freedom
+## AIC: 9225.1
+## 
+## Number of Fisher Scoring iterations: 6</code></pre>
+<pre class="r"><code>#V2
+
+orbital_v2 &lt;- glm(
+  is_potentially_hazardous_asteroid ~
+    orbit_class_type +
+    eccentricity +
+    inclination +
+    semi_major_axis +
+    perihelion_distance,
+  data = orbital_development,
+  family = binomial
+)
+
+summary(orbital_v2)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = is_potentially_hazardous_asteroid ~ orbit_class_type + 
+##     eccentricity + inclination + semi_major_axis + perihelion_distance, 
+##     family = binomial, data = orbital_development)
+## 
+## Coefficients:
+##                      Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)         -7.989014   0.404672 -19.742  &lt; 2e-16 ***
+## orbit_class_typeAPO  2.372686   0.122357  19.391  &lt; 2e-16 ***
+## orbit_class_typeATE  2.560349   0.185347  13.814  &lt; 2e-16 ***
+## orbit_class_typeIEO  3.483220   0.541313   6.435 1.24e-10 ***
+## eccentricity         5.090807   0.525496   9.688  &lt; 2e-16 ***
+## inclination          0.017532   0.002305   7.605 2.85e-14 ***
+## semi_major_axis     -0.212088   0.139359  -1.522    0.128    
+## perihelion_distance  1.861426   0.356382   5.223 1.76e-07 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 10557.9  on 16555  degrees of freedom
+## Residual deviance:  9183.1  on 16548  degrees of freedom
+## AIC: 9199.1
+## 
+## Number of Fisher Scoring iterations: 6</code></pre>
 <p>Alfie’s Workspace</p>
 <pre class="r"><code>#Making a new data set purely for orbiting body, velocity and miss distance
 individual_observations &lt;- neo_dur_df %&gt;%
