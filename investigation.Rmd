@@ -327,6 +327,85 @@ orbitalRM <- glm(
 summary(orbitalRM)
 ```
 
+A multiple logistic regression model was fitted using orbital class, eccentricity, inclination and semi-major axis as explanatory variables. All coefficients were statistically significant at the 5% significance level. Eccentricity, inclination and semi-major axis showed positive associations with the odds of being hazardous when accounting for the other predictors. Apollo, Aten and Atira asteroids also exhibited higher estimated odds of hazard classification relative to Amor asteroids. The reduction in deviance from 13,227 to 11,522 indicates an improvement in model fit compared with the intercept-only model. However, predictive performance must be checked using the testing dataset.
+
+```{r}
+# Predict hazard probabilities using testing data
+
+orbital_predictions <- neo_test %>%
+  mutate( predicted_probability = predict(
+      orbitalRM,
+      newdata = neo_test,
+      type = "response"
+    )
+  )
+
+orbital_predictions %>%
+  select(
+    is_potentially_hazardous_asteroid,
+    predicted_probability
+  ) %>%
+  head(10)
+```
+
+```{r}
+#response variable to factor
+
+orbital_predictions <- orbital_predictions %>%
+  mutate(
+    is_potentially_hazardous_asteroid = factor(
+      is_potentially_hazardous_asteroid,
+      levels = c(FALSE, TRUE)
+    )
+  )
+#ROC curve
+orbital_roc <- orbital_predictions %>% 
+  roc_curve(
+    truth = is_potentially_hazardous_asteroid,
+    predicted_probability,
+    event_level = "second"
+  )
+autoplot(orbital_roc) +
+  labs(
+    title = "ROC curve for orbital geometry model",
+    x = "False positive rate",
+    y = "True positive rate"
+  ) +
+  theme_minimal()
+#AUC
+orbital_auc <- orbital_predictions %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    predicted_probability,
+    event_level = "second"
+  )
+orbital_auc
+```
+
+
+
+The orbital geometry model achieved an AUC of 0.772 on the testing dataset, providing acceptable discriminatory ability. The ROC curve lies above the diagonal reference line, indicating that the model performs better than random guessing. This suggests that orbital geometry provides useful predictive information even when the defining criteria for hazard classification are excluded. However, the model remains imperfect, with a trade-off between correctly identifying potentially hazardous asteroids and incorrectly classifying non-hazardous asteroids as hazardous.
+
+```{r}
+# Classify asteroids using a threshold of 0.5
+
+orbital_predictions <- orbital_predictions %>%
+  mutate(
+    predicted_class = factor(
+      predicted_probability >= 0.5,
+      levels = c(FALSE, TRUE)
+    )
+  )
+
+#confusion matrix
+
+orbital_predictions %>%
+  conf_mat(
+    truth = is_potentially_hazardous_asteroid,
+    estimate = predicted_class
+  )
+```
+At a classification threshold of 0.5, the orbital geometry model achieved an overall accuracy of 90.63%. However, only 3 of the 481 potentially hazardous asteroids were correctly detected, resulting in a sensitivity of 0.62%. The high accuracy is misleading due to the imbalance between hazardous and non-hazardous observations. Given the importance of correctly identifying potentially hazardous asteroids, alternative classification thresholds should be investigated to improve sensitivity.
 
 
 
