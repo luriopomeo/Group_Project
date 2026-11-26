@@ -313,7 +313,18 @@ ggplot(neo_train, aes(
 Potentially hazardous asteroids generally exhibit higher eccentricity and larger semi-major axes, with median values of approximately 0.55 and 1.77 AU, compared to 0.40 and 1.47 AU for non-hazardous asteroids. Inclination demonstrates a considerably smaller difference between the two classifications, suggesting it may be a weaker individual predictor. However, all three variables exhibit overlapping distributions, suggesting that no single characteristic clearly distinguishes between the classifications. This motivates the construction of a multiple logistic regression model combining these characteristics with orbital class.
 
 ```{r}
+#Multiple logistics regression model, Orbital characteristics 
 
+orbitalRM <- glm(
+  is_potentially_hazardous_asteroid ~ 
+    orbit_class_type +
+    eccentricity+
+    inclination+
+    semi_major_axis,
+  data = neo_train,
+  family = binomial
+)
+summary(orbitalRM)
 ```
 
 

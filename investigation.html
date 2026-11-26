@@ -727,6 +727,43 @@ suggesting that no single characteristic clearly distinguishes between
 the classifications. This motivates the construction of a multiple
 logistic regression model combining these characteristics with orbital
 class.</p>
+<pre class="r"><code>#Multiple logistics regression model, Orbital characteristics 
+
+orbitalRM &lt;- glm(
+  is_potentially_hazardous_asteroid ~ 
+    orbit_class_type +
+    eccentricity+
+    inclination+
+    semi_major_axis,
+  data = neo_train,
+  family = binomial
+)
+summary(orbitalRM)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = is_potentially_hazardous_asteroid ~ orbit_class_type + 
+##     eccentricity + inclination + semi_major_axis, family = binomial, 
+##     data = neo_train)
+## 
+## Coefficients:
+##                      Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)         -6.018068   0.145815 -41.272  &lt; 2e-16 ***
+## orbit_class_typeAPO  2.150924   0.102317  21.022  &lt; 2e-16 ***
+## orbit_class_typeATE  2.012966   0.143913  13.987  &lt; 2e-16 ***
+## orbit_class_typeIEO  2.794089   0.511314   5.465 4.64e-08 ***
+## eccentricity         2.656006   0.185711  14.302  &lt; 2e-16 ***
+## inclination          0.015678   0.002072   7.565 3.87e-14 ***
+## semi_major_axis      0.356107   0.065044   5.475 4.38e-08 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 13227  on 20694  degrees of freedom
+## Residual deviance: 11522  on 20688  degrees of freedom
+## AIC: 11536
+## 
+## Number of Fisher Scoring iterations: 6</code></pre>
 <p>Alfie’s Workspace</p>
 <pre class="r"><code>#Making a new data set purely for orbiting body, velocity and miss distance
 individual_observations &lt;- neo_dur_df %&gt;%
