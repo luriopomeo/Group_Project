@@ -75,7 +75,7 @@ Conclusion - which of the variables we were invesetigating in our EDA were inclu
 
 We developed two logistic regression models to investigate which asteroid characteristics are most useful for predicting whether an asteroid is potentially hazardous.
 
-Both models were developed using backward feature selection, starting with an initial set of 20 candidate predictors. For the Independent Model, three parameters associated with NASA's existing hazard assessment approach were excluded before feature selection, leaving 17 candidate predictors. The selection procedure then iteratively removed predictors when doing so improved the mean ROC-AUC obtained through five-fold cross-validation.
+Both models were developed using backward feature selection, starting with an initial set of 20 candidate predictors. For the Model Independent From NASA Сriteria (Independent Model), three parameters associated with NASA's existing hazard assessment approach were excluded before feature selection, leaving 17 candidate predictors. The selection procedure then iteratively removed predictors when doing so improved the mean ROC-AUC obtained through five-fold cross-validation.
 
 As a result, the Full Model retained 15 predictors, while the Independent Model retained 14 predictors. The purpose of this comparison is to investigate whether asteroid hazard status can be predicted effectively using alternative characteristics, without relying directly on NASA's existing criteria.
 
