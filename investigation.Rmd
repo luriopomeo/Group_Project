@@ -573,6 +573,93 @@ orbital_v2 <- glm(
 
 summary(orbital_v2)
 ```
+```{r}
+orbital_comparison <- orbital_validation %>%
+  mutate(
+    is_potentially_hazardous_asteroid =
+      factor(is_potentially_hazardous_asteroid,
+             levels = c(FALSE, TRUE)),
+
+    predicted_v1 = predict(
+      orbital_v1,
+      newdata = orbital_validation,
+      type = "response"
+    ),
+
+    predicted_v2 = predict(
+      orbital_v2,
+      newdata = orbital_validation,
+      type = "response"
+    )
+  )
+#compare v1 and v2 ROC
+orbital_comparison %>%
+  pivot_longer(
+    cols = c(predicted_v1, predicted_v2),
+    names_to = "model",
+    values_to = "probability"
+  ) %>%
+  group_by(model) %>%
+  roc_curve(
+    truth = is_potentially_hazardous_asteroid,
+    probability,
+    event_level = "second"
+  ) %>%
+  ggplot(aes(
+    x = 1 - specificity,
+    y = sensitivity,
+    colour = model
+  )) +
+  geom_line(linewidth = 1) +
+  geom_abline(linetype = "dashed") +
+  scale_colour_manual(
+    values = c("steelblue", "red3"),
+    labels = c("Version 1", "Version 2")
+  ) +
+  labs(
+    title = "ROC comparison of orbital geometry models",
+    x = "False positive rate",
+    y = "True positive rate",
+    colour = "Model"
+  ) +
+  theme_minimal()
+```
+```{r}
+# Compare validation AUC values
+
+orbital_auc_comparison <- orbital_comparison %>%
+  pivot_longer(
+    cols = c(predicted_v1, predicted_v2),
+    names_to = "model",
+    values_to = "probability"
+  ) %>%
+  group_by(model) %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    probability,
+    event_level = "second"
+  )
+
+orbital_auc_comparison
+```
+Despite reducing the AIC from 9,225.1 to 9,199.1, the addition of perihelion distance did not improve discriminatory ability on the dataset. The AUC actually decreased slightly from 0.782 to 0.779, with the ROC curves looking identitical. This may be explained by the mathematical relationship between perihelion distance, eccentricity and semi-major axis, limiting the additional predictive information provided. These findings show me that increasing model complexity and improving model fit do not necessarily improve predictive performance.
+
+
+```{r}
+# V3, removing semi-major axis
+
+orbital_v3 <- glm(
+  is_potentially_hazardous_asteroid ~
+    orbit_class_type +
+    eccentricity +
+    inclination +
+    perihelion_distance,
+  data = orbital_development,
+  family = binomial
+)
+
+summary(orbital_v3)
+```
 
 
 Alfie's Workspace
