@@ -1427,7 +1427,7 @@ predictions <- predict(
 asteroids_model %>%
   roc_curve(
     truth = is_hazardous,
-    .hazardos,
+    .hazardous,
     event_level = "second"
   ) %>%
   autoplot()

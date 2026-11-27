@@ -32,11 +32,13 @@ library(ggplot2)
 
 ## Research Question
 
-Monitoring Near-Earth Objects (NEOs) is critical for planetary defense and assessing potential impact risks to Earth. Our project is investigating what orbital and physical characteristics of an asteroid defined as an NEO could make it potentially hazardous. NASA already has a strict, predefined definition for what makes an asteroid potentially hazardous to Earth - an NEO must satisfy both the criteria: having an absolute magnitude less than 22 (a variable that is inversly proportional to the estimated diameter of an asteroid, which cannot be found directly by physical measurement), and the minimum orbit intersection distance (MOID) with Earth be less than 0.05 AU We want to produce two models; one that aims to replicate NASA's definitions, including the variables MOID and diameter and another which doesn't include variables included in NASA's defintions, so they don't mathematically dominate the model, letting us investigate which underlying orbital and kinematic features actually drive hazard risk.
+Monitoring Near-Earth Objects (NEOs) is critical for planetary defense and assessing potential impact risks to Earth. Our project is investigating what orbital and physical characteristics of an asteroid defined as an NEO could make it potentially hazardous. NASA already has a strict, predefined definition for what makes an asteroid potentially hazardous to Earth - an NEO must satisfy both the criteria: having an absolute magnitude less than 22, and the minimum orbit intersection distance (MOID) with Earth be less than 0.05 AU We want to produce two models; one that aims to replicate NASA's definitions, including the variables MOID and diameter and another which doesn't include variables included in NASA's defintions, so they don't mathematically dominate the model, letting us investigate which underlying orbital and kinematic features actually drive hazard risk.
 
 ## Data
 
 We chose to use the NASA, Near-Earth Object (NEO) Dataset. 
+
+The data set includes 44 variables, of which we investigated 9 key ones. As a basis for our investigation, we used the is_potentially_hazardous_asteroid variable which was the logical NASA classification of whether an asteroid was hazardous or not at the time of observation. We considered the explanatory variables minimum_orbit_intersection, which describes the minimum distance between the two orbital paths of Earth and the asteroid in AU, absolute_magnitude_h, which is a variable that is inversely proportional to the estimated diameter of an asteroid, estimated_diameter_kilometers_min and estimated_diameter_kilometers_max, eccentricity, which is a measurement of how much the orbit differs from a perfect circle, orbit_class_type, which includes 4 different categories, relative_velocity_0, which is the relative velocity of the asteroid at the time of the first observation, and miss_distance_kilometers_0, which is the minimum distance of the asteroid and earth within the first observation.
 
 Briefly describe your dataset here - include a description of the key variables you will be investigating. 
 Include a citation for your data. 
@@ -75,7 +77,7 @@ Conclusion - which of the variables we were invesetigating in our EDA were inclu
 
 We developed two logistic regression models to investigate which asteroid characteristics are most useful for predicting whether an asteroid is potentially hazardous.
 
-Both models were developed using backward feature selection, starting with an initial set of 20 candidate predictors. For the Model Independent From NASA Сriteria (Independent Model), three parameters associated with NASA's existing hazard assessment approach were excluded before feature selection, leaving 17 candidate predictors. The selection procedure then iteratively removed predictors when doing so improved the mean ROC-AUC obtained through five-fold cross-validation.
+Both models were developed using backward feature selection, starting with an initial set of 20 candidate predictors. For the Independent Model, three parameters associated with NASA's existing hazard assessment approach were excluded before feature selection, leaving 17 candidate predictors. The selection procedure then iteratively removed predictors when doing so improved the mean ROC-AUC obtained through five-fold cross-validation.
 
 As a result, the Full Model retained 15 predictors, while the Independent Model retained 14 predictors. The purpose of this comparison is to investigate whether asteroid hazard status can be predicted effectively using alternative characteristics, without relying directly on NASA's existing criteria.
 
