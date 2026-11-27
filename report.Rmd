@@ -32,20 +32,13 @@ library(ggplot2)
 
 ## Research Question
 
-Monitoring Near-Earth Objects (NEOs) is critical for planetary defense and assessing potential impact risks to Earth. Our project is investigating what orbital and physical characteristics of an asteroid defined as an NEO could make it potentially hazardous. NASA already has a strict, predefined definition for what makes an asteroid potentially hazardous to Earth - an NEO must satisfy both the criteria: having an absolute magnitude less than 22, and the minimum orbit intersection distance (MOID) with Earth be less than 0.05 AU We want to produce two models; one that aims to replicate NASA's definitions, including the variables MOID and diameter and another which doesn't include variables included in NASA's defintions, so they don't mathematically dominate the model, letting us investigate which underlying orbital and kinematic features actually drive hazard risk.
+Monitoring Near-Earth Objects (NEOs) is critical for planetary defense and assessing potential impact risks to Earth. Our project is investigating what orbital and physical characteristics of an asteroid defined as an NEO could make it potentially hazardous. NASA already has a strict, predefined definition for what makes an asteroid potentially hazardous to Earth - an NEO must satisfy both the criteria: having an absolute magnitude less than 22, and the minimum orbit intersection distance (MOID) with Earth be less than 0.05 AU. We want to produce two models; one that aims to replicate NASA's definitions, including the variables MOID and diameter, and another which doesn't include variables included in NASA's definitions, so they don't mathematically dominate the model and let us investigate which underlying orbital and kinematic features actually drive hazard risk.
 
 ## Data
 
-We chose to use the NASA, Near-Earth Object (NEO) Dataset. 
+We chose to use the NASA, Near-Earth Object (NEO) Dataset [1]. 
 
-The data set includes 44 variables, of which we investigated 9 key ones. As a basis for our investigation, we used the is_potentially_hazardous_asteroid variable which was the logical NASA classification of whether an asteroid was hazardous or not at the time of observation. We considered the explanatory variables minimum_orbit_intersection, which describes the minimum distance between the two orbital paths of Earth and the asteroid in AU, absolute_magnitude_h, which is a variable that is inversely proportional to the estimated diameter of an asteroid, estimated_diameter_kilometers_min and estimated_diameter_kilometers_max, eccentricity, which is a measurement of how much the orbit differs from a perfect circle, orbit_class_type, which includes 4 different categories, relative_velocity_0, which is the relative velocity of the asteroid at the time of the first observation, and miss_distance_kilometers_0, which is the minimum distance of the asteroid and earth within the first observation.
-
-Briefly describe your dataset here - include a description of the key variables you will be investigating. 
-Include a citation for your data. 
-See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on proper citation for datasets. 
-If you got your data off the web, make sure to state the retrieval date.
-
-minimum orbit intersection distance (MOID), relative velocity, miss distance, absolute magnitude, id - plus some other variables and just explain what they are 
+The data set includes 44 variables, of which we investigated 9 key ones. The data set includes all relative data for the classification fo an asteroid, as well as 4 separate observations of each asteroid. As a basis for our investigation, we used the is_potentially_hazardous_asteroid variable which was the logical NASA classification of whether an asteroid was hazardous or not at the time of observation. We considered the explanatory variables minimum_orbit_intersection, which describes the minimum distance between the two orbital paths of Earth and the asteroid in AU, absolute_magnitude_h, which is a variable that is inversely proportional to the estimated diameter of an asteroid, estimated_diameter_kilometers_min and estimated_diameter_kilometers_max, eccentricity, which is a measurement of how much the orbit differs from a perfect circle, orbit_class_type, which includes 4 different categories, relative_velocity_0, which is the relative velocity of the asteroid at the time of the first observation, and miss_distance_kilometers_0, which is the minimum distance of the asteroid and earth within the first observation.
 
 ## Findings
 
@@ -65,7 +58,7 @@ The addin will ignore code chunks and only count the words in prose. If you don'
 You can also load your data here and present any analysis results / plots.
 Make sure to hide your code with  `echo = FALSE` unless the point you are trying to make is about the code itself, in which case you should show your code.
 
-Brook/Alfie/Lucio/Jonah - write about EDA on what variables could be the most significant based on it - only write about your own work!!!! - ie eccentricity, orbit type, relative velocity, miss distance. visulisations and theory. make sure to reference theory.
+Brook/Alfie/Lucio/Jonah - write about EDA on what variables could be the most significant based on it - only write about your own work!!!! - ie eccentricity, orbit type, relative velocity, miss distance. visualisations and theory. make sure to reference theory.
 
 Jonah - benchmark, for how good a logistic regression model can be if just including the criteria for potentially hazardous 0.98 auroc.
 
@@ -92,6 +85,6 @@ Our preliminary analysis also showed that NASA's two main hazard assessment crit
 In the next stage, we will investigate the unexpectedly high test ROC-AUC, check for missing data and differences between the training and test datasets, and verify that the evaluation procedure is consistent. We will then reassess the models' performance and determine how reliably the Independent Model can predict asteroid hazard status without directly using NASA's criteria.
 ## References
 
-Jayawardana, S. (n.d.). *NASA Near-Earth Objects (NEO) Full Dataset* [Data set]. Kaggle. Retrieved [Insert Retrieval Date, e.g., 18 October 2026], from https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-full-dataset
+[1] Jayawardana, S. (n.d.). *NASA Near-Earth Objects (NEO) Full Dataset* [Data set]. Kaggle. Retrieved [Insert Retrieval Date, e.g., 18 October 2026], from https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-full-dataset
 
 
