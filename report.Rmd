@@ -71,6 +71,21 @@ KATE - write about how depending on what starting variables in large model which
 
 Conclusion - which of the variables we were invesetigating in our EDA were included in kates final non-criteria including. Mention how kates model higher than jonahs when including the criteria. Conclude saying that the variables in kates selective model must be the most significant indicators of hazardousness outside of the criteria (moid and absolute magnitude) 
 
+### Model Development and Preliminary Results (Kate first draft)
+
+We developed two logistic regression models to investigate which asteroid characteristics are most useful for predicting whether an asteroid is potentially hazardous.
+
+The **Full Model** uses 15 predictors selected through backward feature selection from the initial set of candidate variables. The **Independent Model** uses 14 predictors, excluding the three parameters used in NASA's existing hazard assessment approach before performing feature selection. The purpose of this comparison is to investigate whether asteroid hazard status can be predicted effectively using alternative characteristics, without relying directly on NASA's existing criteria.
+
+Both models were trained using the training dataset. Their performance was evaluated using ROC-AUC, with five-fold cross-validation used during feature selection.
+
+The cross-validation results for the Independent Model were relatively consistent across the five folds, with a mean ROC-AUC of 0.882. Its ROC-AUC on the training dataset was 0.884, suggesting consistent performance during cross-validation and training.
+
+However, the test results were unexpectedly high. Both models achieved a ROC-AUC of approximately 0.988, despite having different predictors and substantially different predicted probabilities. This discrepancy between cross-validation and test performance requires further investigation.
+
+Our preliminary analysis also showed that NASA's two main hazard assessment criteria, minimum orbit intersection distance and absolute magnitude, almost perfectly reproduce the hazard classification in our dataset, with only 10 disagreements among 4,981 test observations. This suggests that the target variable is strongly associated with these criteria and may also be predictable from other, correlated orbital characteristics.
+
+In the next stage, we will investigate the unexpectedly high test ROC-AUC, check for missing data and differences between the training and test datasets, and verify that the evaluation procedure is consistent. We will then reassess the models' performance and determine how reliably the Independent Model can predict asteroid hazard status without directly using NASA's criteria.
 ## References
 
 Jayawardana, S. (n.d.). *NASA Near-Earth Objects (NEO) Full Dataset* [Data set]. Kaggle. Retrieved [Insert Retrieval Date, e.g., 18 October 2026], from https://www.kaggle.com/datasets/sunethjayawardana/nasa-near-earth-objects-neo-full-dataset
