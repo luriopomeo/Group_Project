@@ -660,7 +660,70 @@ orbital_v3 <- glm(
 
 summary(orbital_v3)
 ```
+Removing semi-major axis resulted in only a tiny increase in AIC from 9,199.1 to 9,199.5, whilst reducing the number of variables from five to four. All remaining predictor coefficients were statistically significant at the 5% significance level. This suggests that semi-major axis provides limited additional value when perihelion distance and eccentricity are included. However, validation performance must be assessed before selecting the final model.
 
+```{r}
+# validation predictions
+
+orbital_comparison <- orbital_comparison %>%
+  mutate(
+    predicted_v3 = predict(
+      orbital_v3,
+      newdata = orbital_validation,
+      type = "response"
+    )
+  )
+
+#ROC Compare 2
+# Compare ROC curves for all three model versions
+
+orbital_comparison %>%
+  pivot_longer(
+    cols = c(predicted_v1, predicted_v2, predicted_v3),
+    names_to = "model",
+    values_to = "probability"
+  ) %>%
+  group_by(model) %>%
+  roc_curve(
+    truth = is_potentially_hazardous_asteroid,
+    probability,
+    event_level = "second"
+  ) %>%
+  ggplot(aes(
+    x = 1 - specificity,
+    y = sensitivity,
+    colour = model
+  )) +
+  geom_line(linewidth = 1) +
+  geom_abline(linetype = "dashed") +
+  scale_colour_manual(
+    values = c("steelblue", "red3", "darkgreen"),
+    labels = c("Version 1", "Version 2", "Version 3")
+  ) +
+  labs(
+    title = "ROC comparison of orbital geometry models",
+    x = "False positive rate",
+    y = "True positive rate",
+    colour = "Model"
+  ) +
+  theme_minimal()
+#AUC Vals
+orbital_auc_comparison <- orbital_comparison %>%
+  pivot_longer(
+    cols = c(predicted_v1, predicted_v2, predicted_v3),
+    names_to = "model",
+    values_to = "probability"
+  ) %>%
+  group_by(model) %>%
+  roc_auc(
+    truth = is_potentially_hazardous_asteroid,
+    probability,
+    event_level = "second"
+  )
+
+orbital_auc_comparison
+```
+All three orbital geometry models demonstrated similar discriminatory ability, with validation AUC values of 0.782, 0.779 and 0.780 respectively. Despite Versions 2 and 3 achieving lower AIC values, neither demonstrated improved discriminatory ability compared with Version 1. This suggests that including perihelion distance provides limited additional predictive value. Version 1 was therefore retained as the final model due to its marginally higher validation AUC, relatively simple structure and interpretable explanatory variables.
 
 Alfie's Workspace
 ```{r}
